@@ -6,15 +6,16 @@
 // we are going to need to have some more accurate reps here
 typedef double Value;
 
-typedef struct {
-    int capacity;
-    int count;
-    Value* values;
+typedef struct
+{
+  int capacity;
+  int count;
+  Value* values;
 } ValueArray;
 
-void initValueArray(ValueArray* array);
-void writeValueArray(ValueArray* array, Value value);
-void freeValueArray(ValueArray* array);
-void printValue(Value value);
+void initValueArray (ValueArray* array);
+void writeValueArray (ValueArray* array, Value value);
+void freeValueArray (ValueArray* array);
+void printValue (Value value);
 
 #endif
