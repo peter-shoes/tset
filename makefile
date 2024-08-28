@@ -1,13 +1,14 @@
 SRC = src
 INC = inc
 BIN = bin
-SCR = pkk_scripts
+TEST = test/t_scripts
 
 pkk: $(SRC) $(INC)
-	gcc -g $(SRC)/* -I $(INC) -o $(BIN)/pkk
+	gcc -g $(SRC)/* -I $(INC) -o $(BIN)/tset
+
+run:
+	./bin/tset $(TEST)/test1.t
 
 clean:
 	rm -rf $(BIN)/*
 
-test:
-	./bin/pkk $(SCR)/test.pkk

@@ -39,6 +39,19 @@ isAtEnd ()
   return *scanner.current == '\0';
 }
 
+static bool
+isWhitespace (char c)
+{
+  if (
+    (c == ' ') ||
+    (c == '\r') ||
+    (c == '\t') ||
+    (c == '\n')
+  )
+    return true;
+  return false;
+}
+
 static char
 advance ()
 {
@@ -116,28 +129,25 @@ skipWhitespace ()
 }
 
 static Token
-identifier()
+comment ()
 {
-  while (isAlpha(peek()) || isDigit(peek()))
-    advance();
-  return makeToken(TOKEN_IDENTIFIER);
+  char buf[255];
+  int i = 0;
+  while (isAlpha (peek ()))
+  {
+    buf[i] = peek ();
+    i++;
+    advance ();
+  }
+  return makeToken (TOKEN_COMMENT);
 }
 
 static Token
-number ()
+word ()
 {
-  while (isDigit (peek ()))
-    advance ();
-
-  // look for fractional part
-  if (peek () == '.' && isDigit (peekNext ()))
-    {
-      advance ();
-      while (isDigit (peek ())) 
-        advance ();
-    }
-
-  return makeToken (TOKEN_NUMBER);
+  while (!isWhitespace ( peek()) && !isAtEnd ())
+    advance();
+  return makeToken (TOKEN_WORD);
 }
 
 Token
@@ -148,62 +158,67 @@ scanToken ()
 
   if (isAtEnd ())
     return makeToken (TOKEN_EOF);
+  
+  /*  What we want to do is use spaces as a delimiter and figure out what 
+      each token looks like based on that.
+      There are no numbers or letters or symbols, it's all semantic  */
 
   char c = advance ();
-  if (isAlpha (c))
-    return identifier ();
-  if (isDigit (c))
-    return number ();
+  if (c == '%')
+    return comment ();
+  return word ();
+  // if (isDigit (c))
+  //   return number ();
 
-  switch (c)
-    {
-      // one char
-      case '(':
-        return makeToken(TOKEN_LEFT_PAREN);
-      case ')':
-        return makeToken(TOKEN_RIGHT_PAREN);
-      case '[':
-        return makeToken(TOKEN_LEFT_BRACKET);
-      case ']':
-        return makeToken(TOKEN_RIGHT_BRACKET);
-      case ',':
-        return makeToken(TOKEN_COMMA);
-      case '+': 
-        return makeToken(TOKEN_PLUS);
-      case '*':
-        return makeToken(TOKEN_STAR);
-      case '|':
-        return makeToken(TOKEN_LINE);
-      case '~':
-        return makeToken(TOKEN_TILDE);
-      case '&':
-        return makeToken(TOKEN_AND);
-      case '>':
-        return makeToken(TOKEN_GREATER);
-      case '<':
-        return makeToken(TOKEN_LESS);
-      // multi-char
-      case '=':
-        return makeToken(match('>') ? TOKEN_ASSIGN : TOKEN_EQUAL);
-      case '-':
-        return makeToken(match('>') ? TOKEN_GUARD : TOKEN_MINUS);
-      case '/':
-        return makeToken(match('~') ? TOKEN_SLASH_TILDE : TOKEN_SLASH);
-      // bang stuff (binary negations)
-      case '!' :
-        {
-          if (match('='))
-            return makeToken(TOKEN_BANG_EQUAL);
-          else if (match('|'))
-            return makeToken(TOKEN_BANG_LINE);
-          else if (match('~'))
-            return makeToken(TOKEN_BANG_TILDE);
-          else if (match('&'))
-            return makeToken(TOKEN_BANG_AND);
-          // avoiding bang_slash_tilde for now (idek what it does)
-          else return makeToken(TOKEN_BANG);
-        }
-    }
+  // switch (c)
+  //   {
+  //     // one char
+  //     case '(':
+  //       return makeToken(TOKEN_LEFT_PAREN);
+  //     case ')':
+  //       return makeToken(TOKEN_RIGHT_PAREN);
+  //     case '[':
+  //       return makeToken(TOKEN_LEFT_BRACKET);
+  //     case ']':
+  //       return makeToken(TOKEN_RIGHT_BRACKET);
+  //     case ',':
+  //       return makeToken(TOKEN_COMMA);
+  //     case '+': 
+  //       return makeToken(TOKEN_PLUS);
+  //     case '*':
+  //       return makeToken(TOKEN_STAR);
+  //     case '|':
+  //       return makeToken(TOKEN_LINE);
+  //     case '~':
+  //       return makeToken(TOKEN_TILDE);
+  //     case '&':
+  //       return makeToken(TOKEN_AND);
+  //     case '>':
+  //       return makeToken(TOKEN_GREATER);
+  //     case '<':
+  //       return makeToken(TOKEN_LESS);
+  //     // multi-char
+  //     case '=':
+  //       return makeToken(match('>') ? TOKEN_ASSIGN : TOKEN_EQUAL);
+  //     case '-':
+  //       return makeToken(match('>') ? TOKEN_GUARD : TOKEN_MINUS);
+  //     case '/':
+  //       return makeToken(match('~') ? TOKEN_SLASH_TILDE : TOKEN_SLASH);
+  //     // bang stuff (binary negations)
+  //     case '!' :
+  //       {
+  //         if (match('='))
+  //           return makeToken(TOKEN_BANG_EQUAL);
+  //         else if (match('|'))
+  //           return makeToken(TOKEN_BANG_LINE);
+  //         else if (match('~'))
+  //           return makeToken(TOKEN_BANG_TILDE);
+  //         else if (match('&'))
+  //           return makeToken(TOKEN_BANG_AND);
+  //         // avoiding bang_slash_tilde for now (idek what it does)
+  //         else return makeToken(TOKEN_BANG);
+  //       }
+  //   }
 
   return errorToken("Unexpected character.");
 }
