@@ -42,10 +42,10 @@ static InterpretResult
 run ()
 {
 
-#define READ_BYTE () (*vm.ip++)
-#define READ_CONSTANT () (vm.chunk->constants.values[READ_BYTE ()])
+#define READ_BYTE() (*vm.ip++)
+#define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE ()])
 // insane hacky junk
-#define BINARY_OP (op) \
+#define BINARY_OP(op) \
   do { \
     double b = pop (); \
     double a = pop (); \
