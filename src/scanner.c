@@ -128,12 +128,14 @@ skipWhitespace ()
     }
 }
 
+/*  LaTeX comments go to the next \n char after the % char, 
+    scan the whole line, return as a single token  */
 static Token
 comment ()
 {
   char buf[255];
   int i = 0;
-  while (isAlpha (peek ()))
+  while (peek () != '\n')
   {
     buf[i] = peek ();
     i++;
