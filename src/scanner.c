@@ -129,25 +129,56 @@ skipWhitespace ()
 }
 
 /*  LaTeX comments go to the next \n char after the % char, 
-    scan the whole line, return as a single token  */
+    scan the whole line, return as a single token
+    
+    NOTE: in order to figure out what the def is modifying, just take the next
+    two tokens in the line.
+    If the first token was a def or mathdef, you're saying you want to set-up
+    a macro. What happens next is your fault.
+    Conversely, if there are more than three tokens in a def line, the rest 
+    will be disregarded as comments.  
+    For tables, we're only concerned with the very next token, which should
+    be a path. Again, anything after that is considered a comment  */
 static Token
 comment ()
 {
   char buf[255];
   int i = 0;
+  bool first_token = true;
   while (peek () != '\n')
-  {
-    buf[i] = peek ();
-    i++;
-    advance ();
-  }
+    {
+      if (isWhitespace (peek ()) && first_token)
+        {
+          buf[i] = '\0'; /* End the string  */
+          if (strcmp (buf, "def") == 0)
+            return makeToken (TOKEN_DEF);
+          if (strcmp (buf, "mathdef") == 0)
+            return makeToken (TOKEN_MATHDEF);
+          if (strcmp (buf, "table") == 0)
+            return makeToken (TOKEN_TABLE);
+          first_token = false;
+        }
+      if (first_token)
+        {
+          buf[i] = peek ();
+          i++;
+        }
+      advance ();
+    }
   return makeToken (TOKEN_COMMENT);
+}
+static Token
+command ()
+{
+  while (!isWhitespace ( peek ()) && !isAtEnd ())
+    advance();
+  return makeToken (TOKEN_COMMAND);
 }
 
 static Token
 word ()
 {
-  while (!isWhitespace ( peek()) && !isAtEnd ())
+  while (!isWhitespace ( peek ()) && !isAtEnd ())
     advance();
   return makeToken (TOKEN_WORD);
 }
@@ -166,61 +197,15 @@ scanToken ()
       There are no numbers or letters or symbols, it's all semantic  */
 
   char c = advance ();
-  if (c == '%')
-    return comment ();
-  return word ();
-  // if (isDigit (c))
-  //   return number ();
-
-  // switch (c)
-  //   {
-  //     // one char
-  //     case '(':
-  //       return makeToken(TOKEN_LEFT_PAREN);
-  //     case ')':
-  //       return makeToken(TOKEN_RIGHT_PAREN);
-  //     case '[':
-  //       return makeToken(TOKEN_LEFT_BRACKET);
-  //     case ']':
-  //       return makeToken(TOKEN_RIGHT_BRACKET);
-  //     case ',':
-  //       return makeToken(TOKEN_COMMA);
-  //     case '+': 
-  //       return makeToken(TOKEN_PLUS);
-  //     case '*':
-  //       return makeToken(TOKEN_STAR);
-  //     case '|':
-  //       return makeToken(TOKEN_LINE);
-  //     case '~':
-  //       return makeToken(TOKEN_TILDE);
-  //     case '&':
-  //       return makeToken(TOKEN_AND);
-  //     case '>':
-  //       return makeToken(TOKEN_GREATER);
-  //     case '<':
-  //       return makeToken(TOKEN_LESS);
-  //     // multi-char
-  //     case '=':
-  //       return makeToken(match('>') ? TOKEN_ASSIGN : TOKEN_EQUAL);
-  //     case '-':
-  //       return makeToken(match('>') ? TOKEN_GUARD : TOKEN_MINUS);
-  //     case '/':
-  //       return makeToken(match('~') ? TOKEN_SLASH_TILDE : TOKEN_SLASH);
-  //     // bang stuff (binary negations)
-  //     case '!' :
-  //       {
-  //         if (match('='))
-  //           return makeToken(TOKEN_BANG_EQUAL);
-  //         else if (match('|'))
-  //           return makeToken(TOKEN_BANG_LINE);
-  //         else if (match('~'))
-  //           return makeToken(TOKEN_BANG_TILDE);
-  //         else if (match('&'))
-  //           return makeToken(TOKEN_BANG_AND);
-  //         // avoiding bang_slash_tilde for now (idek what it does)
-  //         else return makeToken(TOKEN_BANG);
-  //       }
-  //   }
-
+  switch (c)
+    {
+      case '%':
+        return comment ();
+      case '\\':
+        return command ();
+      default:
+        return word ();
+    }
+  /*  It should never execute this code  */
   return errorToken("Unexpected character.");
 }

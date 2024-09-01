@@ -7,4 +7,6 @@
 
 #define DEBUG_TRACE_EXECUTION
 
+#define DEBUG
+
 #endif
