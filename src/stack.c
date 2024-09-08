@@ -1,5 +1,6 @@
 #include "common.h"
 #include "stack.h"
+#include <stdio.h>
 
 typedef struct stack
   {
@@ -15,9 +16,9 @@ initStack ()
 {
   if ((program_stack = (stack_t*) malloc (sizeof (stack_t))) == NULL)
     return 1;
+  stack_tail = program_stack;
   program_stack->node = NULL;
   program_stack->next = NULL;
-  stack_tail = program_stack;
   return 0;
 }
 
@@ -46,7 +47,7 @@ pushToken (Token *token)
   new_node->next = NULL;
   stack_tail->next = new_node;
   stack_tail = new_node;
-  
+  return 0;
 }
 
 /*  Note that you should call isStackEmpty() before calling this to

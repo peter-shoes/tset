@@ -59,3 +59,16 @@ disassembleInstruction (Chunk* chunk, int offset)
         return offset + 1;
     }
 }
+
+void
+debug_token (Token token, int *line)
+{
+  if (token.line != *line)
+    {
+      printf ("%4d ", token.line);
+      *line = token.line;
+    } 
+  else
+    printf ("   | ");
+  printf ("%2d '%.*s'\n", token.type, token.length, token.start);
+}

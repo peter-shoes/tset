@@ -5,7 +5,7 @@
 
 int initStack();
 void freeStack();
-int pushToken(Token *);
+int pushToken(Token*);
 Token popToken();
 int isStackEmpty();
 int getStackSize();
