@@ -3,15 +3,9 @@
 #ifndef STACK_H
 #define STACK_H
 
-typedef struct stack
-  {
-    Token node;
-    stack *next;
-  } stack_t;
-
 int initStack();
-int freeStack();
-int pushToken();
+void freeStack();
+int pushToken(Token *);
 Token popToken();
 int isStackEmpty();
 int getStackSize();
