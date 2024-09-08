@@ -64,7 +64,7 @@ run ()
           printf (" ]");
         }
       printf("\n");
-      disassembleInstruction (vm.chunk, (int)(vm.ip-vm.chunk->code));
+      disassemble_instruction (vm.chunk, (int)(vm.ip-vm.chunk->code));
     #endif
       
     uint8_t instruction;

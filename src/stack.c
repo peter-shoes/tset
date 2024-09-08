@@ -12,7 +12,7 @@ stack_t *program_stack;
 stack_t *stack_tail;
 
 int
-initStack ()
+init_stack ()
 {
   if ((program_stack = (stack_t*) malloc (sizeof (stack_t))) == NULL)
     return 1;
@@ -26,13 +26,13 @@ initStack ()
     token left in the stack should be a TOKEN_EOF, so you only need to free
     a single node. This was designed intentionally.  */
 void
-freeStack ()
+free_stack ()
 {
   free (program_stack);
 }
 
 int
-pushToken (Token *token)
+push_token (Token *token)
 {
   if (program_stack->node == NULL)
     {
@@ -50,10 +50,10 @@ pushToken (Token *token)
   return 0;
 }
 
-/*  Note that you should call isStackEmpty() before calling this to
+/*  Note that you should call is_stack_empty() before calling this to
     avoid a segfault in the case that the stack is empty. */
 Token
-popToken()
+pop_token()
 {
   Token tmp;
   stack_t *hold;
@@ -66,7 +66,7 @@ popToken()
 }
 
 int
-isStackEmpty ()
+is_stack_empty ()
 {
   if (program_stack->node->type == TOKEN_EOF)
     return 1;

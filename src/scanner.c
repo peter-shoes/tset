@@ -14,7 +14,7 @@ typedef struct
 Scanner scanner;
 
 void
-initScanner (const char* source)
+init_scanner (const char* source)
 {
   scanner.start = source;
   scanner.current = source;
@@ -22,25 +22,25 @@ initScanner (const char* source)
 }
 
 static bool
-isAlpha (char c)
+is_alpha (char c)
 {
   return  (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
 }
 
 static bool
-isDigit (char c)
+is_digit (char c)
 {
   return c >= '0' && c <= '9';
 }
 
 static bool
-isAtEnd () 
+is_at_end () 
 {
   return *scanner.current == '\0';
 }
 
 static bool
-isWhitespace (char c)
+is_whitespace (char c)
 {
   if (
     (c == ' ') ||
@@ -66,16 +66,16 @@ peek ()
 }
 
 static char
-peekNext () 
+peek_next () 
 {
-  if (isAtEnd ()) return '\0';
+  if (is_at_end ()) return '\0';
   return scanner.current[1];
 }
 
 static bool
 match (char expected)
 {
-  if (isAtEnd ())
+  if (is_at_end ())
     return false;
   if (*scanner.current != expected)
     return false;
@@ -84,7 +84,7 @@ match (char expected)
 }
 
 static Token
-makeToken (TokenType type)
+make_token (TokenType type)
 {
   Token token;
   token.type = type;
@@ -95,7 +95,7 @@ makeToken (TokenType type)
 }
 
 static Token
-errorToken (const char* message)
+error_token (const char* message)
 {
   Token token;
   token.type = TOKEN_ERROR;
@@ -106,7 +106,7 @@ errorToken (const char* message)
 }
 
 static void
-skipWhitespace () 
+skip_whitespace () 
 {
   for (;;)
     {
@@ -147,15 +147,15 @@ comment ()
   bool first_token = true;
   while (peek () != '\n')
     {
-      if (isWhitespace (peek ()) && first_token)
+      if (is_whitespace (peek ()) && first_token)
         {
           buf[i] = '\0'; /* End the string  */
           if (strcmp (buf, "def") == 0)
-            return makeToken (TOKEN_DEF);
+            return make_token (TOKEN_DEF);
           if (strcmp (buf, "mathdef") == 0)
-            return makeToken (TOKEN_MATHDEF);
+            return make_token (TOKEN_MATHDEF);
           if (strcmp (buf, "table") == 0)
-            return makeToken (TOKEN_TABLE);
+            return make_token (TOKEN_TABLE);
           first_token = false;
         }
       if (first_token)
@@ -165,32 +165,32 @@ comment ()
         }
       advance ();
     }
-  return makeToken (TOKEN_COMMENT);
+  return make_token (TOKEN_COMMENT);
 }
 static Token
 command ()
 {
-  while (!isWhitespace ( peek ()) && !isAtEnd ())
+  while (!is_whitespace ( peek ()) && !is_at_end ())
     advance();
-  return makeToken (TOKEN_COMMAND);
+  return make_token (TOKEN_COMMAND);
 }
 
 static Token
 word ()
 {
-  while (!isWhitespace ( peek ()) && !isAtEnd ())
+  while (!is_whitespace ( peek ()) && !is_at_end ())
     advance();
-  return makeToken (TOKEN_WORD);
+  return make_token (TOKEN_WORD);
 }
 
 Token
-scanToken ()
+scan_token ()
 {
-  skipWhitespace ();
+  skip_whitespace ();
   scanner.start = scanner.current;
 
-  if (isAtEnd ())
-    return makeToken (TOKEN_EOF);
+  if (is_at_end ())
+    return make_token (TOKEN_EOF);
   
   /*  What we want to do is use spaces as a delimiter and figure out what 
       each token looks like based on that.
@@ -207,5 +207,5 @@ scanToken ()
         return word ();
     }
   /*  It should never execute this code  */
-  return errorToken("Unexpected character.");
+  return error_token("Unexpected character.");
 }

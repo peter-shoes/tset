@@ -4,7 +4,7 @@
 #include "value.h"
 
 void 
-initValueArray (ValueArray* array)
+init_value_array (ValueArray* array)
 {
   array->values = NULL;
   array->capacity = 0;
@@ -12,7 +12,7 @@ initValueArray (ValueArray* array)
 }
 
 void
-writeValueArray (ValueArray* array, Value value)
+write_value_array (ValueArray* array, Value value)
 {
   if (array->capacity < array->count+1)
     {
@@ -27,10 +27,10 @@ writeValueArray (ValueArray* array, Value value)
 }
 
 void
-freeValueArray (ValueArray* array)
+free_value_array (ValueArray* array)
 {
   FREE_ARRAY (Value, array->values, array->capacity);
-  initValueArray (array);
+  init_value_array (array);
 }
 
 void

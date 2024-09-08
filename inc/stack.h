@@ -3,11 +3,10 @@
 #ifndef STACK_H
 #define STACK_H
 
-int initStack();
-void freeStack();
-int pushToken(Token*);
-Token popToken();
-int isStackEmpty();
-int getStackSize();
+int init_stack();
+void free_stack();
+int push_token(Token*);
+Token pop_token();
+int is_stack_empty();
 
 #endif

@@ -24,7 +24,7 @@ repl ()
 }
 
 static char*
-readFile (const char* path)
+read_file (const char* path)
 {
   FILE* file = fopen (path, "rb");
   if (file == NULL)
@@ -58,9 +58,9 @@ readFile (const char* path)
 }
 
 static void
-runFile (const char* path)
+run_file (const char* path)
 {
-  char* source = readFile (path);
+  char* source = read_file (path);
   InterpretResult result = interpret (source);
   free (source);
 
@@ -78,7 +78,7 @@ main (int argc, char *argv[])
   if (argc == 1)
     repl ();
   else if (argc == 2)
-    runFile (argv[1]);
+    run_file (argv[1]);
   else
     {
       fprintf (stderr, "Usage: tset [path]\n");

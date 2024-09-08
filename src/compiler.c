@@ -12,8 +12,8 @@
 void 
 compile (const char* source)
 {
-  initScanner (source);
-  initStack ();
+  init_scanner (source);
+  init_stack ();
   int line = -1;
   int defcounter = -1;
   int defline = -1;
@@ -24,7 +24,7 @@ compile (const char* source)
 
   for(;;) 
     {
-      Token token = scanToken ();
+      Token token = scan_token ();
       
       /*  Handle the case where we have more or less tokens in a def line than
           expected.
@@ -73,7 +73,7 @@ compile (const char* source)
       /*  Allocate a buffer and push onto the stack  */
       Token *buf = (Token*) malloc (sizeof(Token));
       *buf = token;
-      if (pushToken (buf) == 1)
+      if (push_token (buf) == 1)
         {
           fprintf(stderr, "Error: failed to push token on line %d\n", 
                 token.line);
@@ -90,13 +90,13 @@ compile (const char* source)
   #ifdef DEBUG_STACK
   printf("\n======== STACK DEBUG TRACE ========\n");
   #endif
-  while (!isStackEmpty ())
+  while (!is_stack_empty ())
     {
-      Token pop = popToken ();
+      Token pop = pop_token ();
       
       #ifdef DEBUG_STACK
       debug_token (pop, &line);
       #endif
     }
-  freeStack ();
+  free_stack ();
 }
