@@ -1,8 +1,8 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "common.h"
 #include "compiler.h"
-#include "scanner.h"
 #include "stack.h"
 #include "debug.h"
 
@@ -24,6 +24,15 @@ compile (const char* source)
     printf("Error opening file!\n");
     exit(1);
   }
+
+  /*  Set up trackers for macros  */
+  macro_track_t *def_track = (macro_track_t*) malloc (sizeof (macro_track_t));
+  macro_track_t *def_track_tail = def_track;
+  def_track->next = NULL;
+  
+  macro_track_t *mathdef_track = (macro_track_t*) malloc (sizeof (macro_track_t));
+  macro_track_t *mathdef_track_tail = mathdef_track;
+  mathdef_track->next = NULL;
 
   #ifdef DEBUG_SCANNER
   printf("\n======== SCANNER DEBUG TRACE ========\n");
@@ -79,7 +88,6 @@ compile (const char* source)
             }
         }
 
-      
       if ((token.type == TOKEN_DEF) || (token.type == TOKEN_MATHDEF))
         {
           defcounter = 4;
@@ -114,13 +122,43 @@ compile (const char* source)
   while (!is_stack_empty ())
     {
       Token pop = pop_token ();
-
+      
       #ifdef DEBUG_STACK
       debug_token (pop, &line);
       #endif
+
+      /*  Handle macros  */
+      if (pop.type == TOKEN_DEF)
+        if ((peek_next (0).type == TOKEN_MACRO) &&
+              (peek_next (1).type == TOKEN_MACROBODY))
+          {
+            def_track_tail->macro = peek_next (0);
+            def_track_tail->body = peek_next (1);
+            def_track_tail->next = (macro_track_t*) 
+                  malloc (sizeof (macro_track_t));
+            def_track_tail = def_track_tail->next;
+          }
       
+      if (pop.type == TOKEN_WORD)
+        {
+          char wordbuf[255];
+          char macrobuf[255];
+          sprintf(wordbuf, "%.*s", pop.length, pop.start);
+          macro_track_t *tmp = def_track;
+          while (tmp != def_track_tail)
+            {
+              sprintf(macrobuf, "%.*s", tmp->macro.length, tmp->macro.start);
+              if (strcmp (wordbuf, macrobuf) == 0)
+              {
+                pop.length = tmp->body.length;
+                pop.start = tmp->body.start;
+              }
+              tmp = tmp->next;
+            }
+        }
       /*  Write to file  */
       fprintf(fptr, "%.*s", pop.length, pop.start);
+
     }
   free_stack ();
 }

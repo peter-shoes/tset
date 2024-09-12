@@ -72,3 +72,21 @@ is_stack_empty ()
     return 1;
   return 0;
 }
+
+Token
+peek_next (int depth)
+{
+  stack_t *tmp = program_stack;
+  while (depth >= 0)
+    {
+      if (tmp->next != NULL)
+        {
+          tmp = tmp->next;
+          if (tmp->node->type != TOKEN_WHITESPACE)
+            depth--;
+        }
+      else
+        break;
+    }
+  return *tmp->node;
+}
