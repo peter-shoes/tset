@@ -18,6 +18,13 @@ compile (const char* source)
   int defcounter = -1;
   int defline = -1;
 
+  FILE *fptr;
+  fptr = fopen("test/test_output.tex","w");
+  if (fptr == NULL) {
+    printf("Error opening file!\n");
+    exit(1);
+  }
+
   #ifdef DEBUG_SCANNER
   printf("\n======== SCANNER DEBUG TRACE ========\n");
   #endif
@@ -37,32 +44,45 @@ compile (const char* source)
         defcounter = -1;
       if (token.line == defline && defcounter >= 0)
         {
-          if (defcounter == 2)
+          switch (defcounter)
             {
-              token.type = TOKEN_OLDDEF;
-              defcounter--;
+              case 4:
+              case 2:
+                {
+                  defcounter--;
+                  break;
+                }
+              case 3:
+                {
+                  token.type = TOKEN_MACRO;
+                  defcounter--;
+                  break;
+                }
+              case 1:
+                {
+                  token.type = TOKEN_MACROBODY;
+                  defcounter--;
+                  break;
+                }
+              case 0:
+                {
+                  if (token.type == TOKEN_WHITESPACE)
+                    break;
+                  token.type = TOKEN_ERROR;
+                  fprintf(stderr, "Error: too many tokens for def: line %d\n",
+                        token.line);
+                  #ifndef DEBUG_SCANNER
+                  exit(1);
+                  #endif
+                  break;
+                }
             }
-          else if (defcounter == 1)
-            {
-              token.type = TOKEN_NEWDEF;
-              defcounter--;
-            }
-          else if (defcounter == 0)
-            {
-              token.type = TOKEN_ERROR;
-              fprintf(stderr, "Error: too many tokens for def on line %d\n",
-                    token.line);
-              #ifndef DEBUG_SCANNER
-              exit(1);
-              #endif
-            }
-
         }
 
       
       if ((token.type == TOKEN_DEF) || (token.type == TOKEN_MATHDEF))
         {
-          defcounter = 2;
+          defcounter = 4;
           defline = token.line;
         }
 
@@ -90,13 +110,17 @@ compile (const char* source)
   #ifdef DEBUG_STACK
   printf("\n======== STACK DEBUG TRACE ========\n");
   #endif
+
   while (!is_stack_empty ())
     {
       Token pop = pop_token ();
-      
+
       #ifdef DEBUG_STACK
       debug_token (pop, &line);
       #endif
+      
+      /*  Write to file  */
+      fprintf(fptr, "%.*s", pop.length, pop.start);
     }
   free_stack ();
 }

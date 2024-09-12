@@ -63,6 +63,8 @@ disassemble_instruction (Chunk* chunk, int offset)
 void
 debug_token (Token token, int *line)
 {
+  if (token.type == TOKEN_WHITESPACE)
+    return;
   if (token.line != *line)
     {
       printf ("%4d ", token.line);

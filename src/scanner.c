@@ -105,9 +105,10 @@ error_token (const char* message)
   return token;
 }
 
-static void
+static Token
 skip_whitespace () 
 {
+  const char *start = scanner.current;
   for (;;)
     {
       char c = peek ();
@@ -123,9 +124,9 @@ skip_whitespace ()
             advance ();
             break;
           default:
-            return;
+            return make_token (TOKEN_WHITESPACE);
         }
-    }
+    }  
 }
 
 /*  LaTeX comments go to the next \n char after the % char, 
@@ -167,6 +168,7 @@ comment ()
     }
   return make_token (TOKEN_COMMENT);
 }
+
 static Token
 command ()
 {
@@ -186,8 +188,10 @@ word ()
 Token
 scan_token ()
 {
-  skip_whitespace ();
   scanner.start = scanner.current;
+  Token ws = skip_whitespace ();
+  if (scanner.start != scanner.current)
+    return ws;
 
   if (is_at_end ())
     return make_token (TOKEN_EOF);
