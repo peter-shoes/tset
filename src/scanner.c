@@ -186,7 +186,7 @@ command ()
 static Token
 word ()
 {
-  while (!is_whitespace ( peek ()) && !is_at_end ())
+  while (!is_whitespace ( peek ()) && !is_at_end () && (peek () != '$'))
     advance();
   return make_token (TOKEN_WORD);
 }
@@ -237,6 +237,8 @@ scan_token ()
         return delimited_word('"');
       case '\'':
         return delimited_word ('\'');
+      case '$':
+        return make_token (TOKEN_MATHDOLLAR_BEGIN);
       default:
         return word ();
     }

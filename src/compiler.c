@@ -15,6 +15,7 @@ compile (const char* source)
   init_scanner (source);
   init_stack ();
   int line = -1;
+  bool in_mathdollar = false;
 
   FILE *fptr;
   fptr = fopen("test/test_output.tex","w");
@@ -60,6 +61,18 @@ compile (const char* source)
               #ifndef DEBUG_SCANNER
               exit(1)
               #endif
+              break;
+            }
+          
+          case TOKEN_MATHDOLLAR_BEGIN:
+            {
+              if (in_mathdollar)
+                {
+                  token.type = TOKEN_MATHDOLLAR_END;
+                  in_mathdollar = false;
+                }
+              else
+                in_mathdollar = true;
               break;
             }
           default:
