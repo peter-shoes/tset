@@ -18,11 +18,17 @@ compile (const char* source, const char *outpath)
   bool in_mathdollar = false;
 
   FILE *fptr;
-  fptr = fopen(outpath,"w");
-  if (fptr == NULL) {
-    printf("Error opening file!\n");
-    exit(1);
-  }
+  if (outpath == NULL)
+    fptr = stdout;
+    // printf("null outpath\n");
+  else
+    {
+      fptr = fopen(outpath,"w");
+      if (fptr == NULL) {
+        printf("Error opening file!\n");
+        exit(1);
+      }
+    }
 
   /*  Set up trackers for macros  */
   macro_track_t *def_track = (macro_track_t*) malloc (sizeof (macro_track_t));
@@ -145,5 +151,7 @@ compile (const char* source, const char *outpath)
       /*  Write to file  */
       fprintf(fptr, "%.*s", pop.length, pop.start);
     }
+  if (fptr == stdout)
+    fprintf(fptr, "\n");
   free_stack ();
 }
