@@ -40,6 +40,12 @@ is_at_end ()
 }
 
 static bool
+is_end_of_line ()
+{
+  return *scanner.current == '\n';
+}
+
+static bool
 is_whitespace (char c)
 {
   if (
@@ -185,6 +191,20 @@ word ()
   return make_token (TOKEN_WORD);
 }
 
+static Token
+delimited_word (char end)
+{
+  while (!match (end))
+    {
+    if (!is_end_of_line ())
+      advance ();
+    else
+    /*  Make sure we close the delimiter before the end of the line  */
+      return make_token (TOKEN_ERROR);
+    }
+  return make_token (TOKEN_WORD);
+}
+
 Token
 scan_token ()
 {
@@ -207,6 +227,16 @@ scan_token ()
         return comment ();
       case '\\':
         return command ();
+      case '{':
+        return delimited_word ('}');
+      case '(':
+        return delimited_word (')');
+      case '[':
+        return delimited_word (']');
+      case '"':
+        return delimited_word('"');
+      case '\'':
+        return delimited_word ('\'');
       default:
         return word ();
     }

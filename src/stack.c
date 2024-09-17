@@ -86,7 +86,32 @@ peek_next (int depth)
             depth--;
         }
       else
+      {
+        printf("Error: requesting invalid depth\n");
         break;
+      }
     }
   return *tmp->node;
+}
+
+/*  This is a really bad thing, but I don't want to re-write this to be a 
+    doubly linked list, so whatever I'll take the perf hit.  */
+Token
+peek_last ()
+{
+  stack_t *tmp = program_stack;
+  Token hold;
+  while (tmp->next != NULL)
+    {
+      if (tmp->node->type != TOKEN_WHITESPACE)
+        hold = *tmp->node;
+      tmp = tmp->next;
+    }
+  return hold;
+}
+
+void
+update_top_token (const char *new)
+{
+  stack_tail->node->length += (int) (new - stack_tail->node->start)-1;
 }

@@ -15,8 +15,6 @@ compile (const char* source)
   init_scanner (source);
   init_stack ();
   int line = -1;
-  int defcounter = -1;
-  int defline = -1;
 
   FILE *fptr;
   fptr = fopen("test/test_output.tex","w");
@@ -38,76 +36,50 @@ compile (const char* source)
   printf("\n======== SCANNER DEBUG TRACE ========\n");
   #endif
 
-  for(;;) 
+  for(;;)
     {
+      fetch_next:
       Token token = scan_token ();
-      
-      /*  Handle the case where we have more or less tokens in a def line than
-          expected.
-          If we have fewer tokens than needed for a def (AKA 1 or 0), then we
-          will only add appropriate tokens, and the next line won't trigger a
-          token reassignment because the token line will not match the defline.
-          In the case that there are more tokens than are required for a def,
-          we consider those to be errors  */
-      if (token.line != defline && defcounter == 0)
-        defcounter = -1;
-      if (token.line == defline && defcounter >= 0)
-        {
-          switch (defcounter)
+
+      switch (token.type)
+        {          
+          case TOKEN_WORD:
             {
-              case 4:
-              case 2:
-                {
-                  defcounter--;
-                  break;
-                }
-              case 3:
-                {
-                  token.type = TOKEN_MACRO;
-                  defcounter--;
-                  break;
-                }
-              case 1:
-                {
-                  token.type = TOKEN_MACROBODY;
-                  defcounter--;
-                  break;
-                }
-              case 0:
-                {
-                  if (token.type == TOKEN_WHITESPACE)
-                    break;
-                  token.type = TOKEN_ERROR;
-                  fprintf(stderr, "Error: too many tokens for def: line %d\n",
-                        token.line);
-                  #ifndef DEBUG_SCANNER
-                  exit(1);
-                  #endif
-                  break;
-                }
+              int token_type = peek_last ().type;
+              if ((token_type == TOKEN_DEF) || (token_type == TOKEN_MATHDEF))
+                token.type = TOKEN_MACRO;
+              else if (token_type == TOKEN_MACRO)
+                token.type = TOKEN_MACROBODY;
+              break;
             }
+          
+          case TOKEN_ERROR:
+            {
+              fprintf(stderr, "Error: scanner found error token on line %d\nThis makes all future tokens defunct.\n",
+                    token.line);
+              #ifndef DEBUG_SCANNER
+              exit(1)
+              #endif
+              break;
+            }
+          default:
+            break;
         }
-
-      if ((token.type == TOKEN_DEF) || (token.type == TOKEN_MATHDEF))
-        {
-          defcounter = 4;
-          defline = token.line;
-        }
-
-      #ifdef DEBUG_SCANNER
-      debug_token (token, &line);
-      #endif
-
+      
       /*  Allocate a buffer and push onto the stack  */
       Token *buf = (Token*) malloc (sizeof(Token));
       *buf = token;
+      
+      #ifdef DEBUG_SCANNER
+      debug_token (token, &line);
+      #endif
       if (push_token (buf) == 1)
         {
           fprintf(stderr, "Error: failed to push token on line %d\n", 
                 token.line);
           exit(1);
         }
-      
+
       if (token.type == TOKEN_EOF)
       {
         line = -1;
@@ -156,9 +128,9 @@ compile (const char* source)
               tmp = tmp->next;
             }
         }
+      
       /*  Write to file  */
       fprintf(fptr, "%.*s", pop.length, pop.start);
-
     }
   free_stack ();
 }

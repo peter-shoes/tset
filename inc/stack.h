@@ -8,5 +8,7 @@ void free_stack();
 int push_token(Token*);
 Token pop_token();
 int is_stack_empty();
-Token peek_next (int depth);
+Token peek_next (int);
+Token peek_last ();
+void update_top_token (const char *);
 #endif
