@@ -96,8 +96,8 @@ run ()
 }
 
 InterpretResult
-interpret (const char* source)
+interpret (const char* source, const char *outpath)
 {
-  compile (source);
+  compile (source, outpath);
   return INTERPRET_OK;
 }

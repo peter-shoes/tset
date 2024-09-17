@@ -7,22 +7,6 @@
 #include "debug.h"
 #include "vm.h"
 
-static void
-repl ()
-{
-  char line[1024];
-  for (;;)
-    {
-      printf ("> ");
-      if (!fgets (line, sizeof(line), stdin))
-        {
-          printf ("\n");
-          break;
-        }
-    }
-  interpret (line);
-}
-
 static char*
 read_file (const char* path)
 {
@@ -58,10 +42,10 @@ read_file (const char* path)
 }
 
 static void
-run_file (const char* path)
+run_file (const char *inpath, const char *outpath)
 {
-  char* source = read_file (path);
-  InterpretResult result = interpret (source);
+  char* source = read_file (inpath);
+  InterpretResult result = interpret (source, outpath);
   free (source);
 
   if (result == INTERPRET_COMPILE_ERROR)
@@ -75,13 +59,13 @@ main (int argc, char *argv[])
 {
   initVM ();
 
-  if (argc == 1)
-    repl ();
-  else if (argc == 2)
-    run_file (argv[1]);
+  if (argc == 2)
+    run_file (argv[1], NULL);
+  else if (argc == 3)
+    run_file(argv[1], argv[2]);
   else
     {
-      fprintf (stderr, "Usage: tset [path]\n");
+      fprintf (stderr, "Usage: tset [inpath] [outpath]\n");
       exit (64);
     }
 

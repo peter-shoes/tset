@@ -10,6 +10,6 @@ typedef struct macro_track
     struct macro_track *next;
   } macro_track_t;
 
-void compile (const char* source);
+void compile (const char* source, const char *outpath);
 
 #endif

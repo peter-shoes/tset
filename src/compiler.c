@@ -10,7 +10,7 @@
     For that reason, sometimes we must alter the type of the token based on
     that context.  */
 void 
-compile (const char* source)
+compile (const char* source, const char *outpath)
 {
   init_scanner (source);
   init_stack ();
@@ -18,7 +18,7 @@ compile (const char* source)
   bool in_mathdollar = false;
 
   FILE *fptr;
-  fptr = fopen("test/test_output.tex","w");
+  fptr = fopen(outpath,"w");
   if (fptr == NULL) {
     printf("Error opening file!\n");
     exit(1);
@@ -39,7 +39,6 @@ compile (const char* source)
 
   for(;;)
     {
-      fetch_next:
       Token token = scan_token ();
 
       switch (token.type)
@@ -75,6 +74,7 @@ compile (const char* source)
                 in_mathdollar = true;
               break;
             }
+          
           default:
             break;
         }
