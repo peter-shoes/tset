@@ -7,7 +7,8 @@ MATHDEFTEST = $(TEST)/mathdef.tests
 TABLETEST = $(TEST)/table.tests
 MATHSPLITTEST = $(TEST)/mathsplit.tests
 
-tset: $(SRC) $(INC)
+
+tset: $(SRC) $(INC) $(BIN)
 	gcc -g $(SRC)/* -I $(INC) -o $(BIN)/tset
 
 run:
@@ -15,6 +16,9 @@ run:
 
 clean:
 	rm -rf $(BIN)/*
+
+$(BIN):
+	mkdir -p $@
 
 check-def: tset
 	echo "\033[34mRunning def tests ...\033[0m"
