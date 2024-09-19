@@ -64,7 +64,7 @@ compile (const char* source, const char *outpath)
               fprintf(stderr, "Error: scanner found error token on line %d\nThis makes all future tokens defunct.\n",
                     token.line);
               #ifndef DEBUG_SCANNER
-              exit(1)
+              exit(1);
               #endif
               break;
             }
