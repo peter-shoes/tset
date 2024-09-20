@@ -1,5 +1,6 @@
-# TSET LaTeX preprocessor
+<img src="https://github.com/user-attachments/assets/da07b87b-3ca1-4870-a062-73068ba81364" alt="LOGO" width="100"/>
 
+# TSET LaTeX preprocessor
 TSET is a preprocessor for latex based on the syntax of the T language. The T language includes a number of features including:
  - Natural macros with no escapes
  - Simple table importing from CSV
