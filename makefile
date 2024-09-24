@@ -23,26 +23,26 @@ $(BIN):
 check-def: tset
 	echo "\033[34mRunning def tests ...\033[0m"
 	./testsuite/testrunner.sh $(DEFTEST)
-	echo "\n"
 
 check-mathdef: tset
 	echo "\033[34mRunning mathdef tests ...\033[0m"
 	./testsuite/testrunner.sh $(MATHDEFTEST)
-	echo "\n"
 
 check-table: tset
 	echo "\033[34mRunning table tests ...\033[0m"
 	./testsuite/testrunner.sh $(TABLETEST)
-	echo "\n"
 
 check-mathsplit: tset
 	echo "\033[34mRunning mathsplit tests ...\033[0m"
 	./testsuite/testrunner.sh $(MATHSPLITTEST)
-	echo "\n"
 
 check: tset
 	echo "\033[34mRunning all tests ...\033[0m\n"
+	echo '\n'
 	make -s check-def
+	echo '\n'
 	make -s check-mathdef
+	echo '\n'
 	make -s check-table
+	echo '\n'
 	make -s check-mathsplit

@@ -16,11 +16,11 @@ compile (const char* source, const char *outpath)
   init_stack ();
   int line = -1;
   bool in_mathdollar = false;
+  bool in_mathmode = false;
 
   FILE *fptr;
   if (outpath == NULL)
     fptr = stdout;
-    // printf("null outpath\n");
   else
     {
       fptr = fopen(outpath,"w");
@@ -48,7 +48,8 @@ compile (const char* source, const char *outpath)
       Token token = scan_token ();
 
       switch (token.type)
-        {          
+        {
+          case TOKEN_COMMAND:
           case TOKEN_WORD:
             {
               int token_type = peek_last ().type;
@@ -56,6 +57,8 @@ compile (const char* source, const char *outpath)
                 token.type = TOKEN_MACRO;
               else if (token_type == TOKEN_MACRO)
                 token.type = TOKEN_MACROBODY;
+              else if (in_mathmode)
+                token.type = TOKEN_MATHWORD;
               break;
             }
           
@@ -75,9 +78,13 @@ compile (const char* source, const char *outpath)
                 {
                   token.type = TOKEN_MATHDOLLAR_END;
                   in_mathdollar = false;
+                  in_mathmode = false;
                 }
               else
+              {
                 in_mathdollar = true;
+                in_mathmode = true;
+              }
               break;
             }
           
@@ -119,24 +126,29 @@ compile (const char* source, const char *outpath)
       #endif
 
       /*  Handle macros  */
-      if (pop.type == TOKEN_DEF)
+      if ((pop.type == TOKEN_DEF)||(pop.type == TOKEN_MATHDEF))
         if ((peek_next (0).type == TOKEN_MACRO) &&
               (peek_next (1).type == TOKEN_MACROBODY))
           {
-            def_track_tail->macro = peek_next (0);
-            def_track_tail->body = peek_next (1);
-            def_track_tail->next = (macro_track_t*) 
+            macro_track_t* tail = (pop.type == TOKEN_DEF) ? def_track_tail : mathdef_track_tail;
+            tail->macro = peek_next (0);
+            tail->body = peek_next (1);
+            tail->next = (macro_track_t*) 
                   malloc (sizeof (macro_track_t));
-            def_track_tail = def_track_tail->next;
+            if (pop.type == TOKEN_DEF)
+              def_track_tail = tail->next;
+            else
+              mathdef_track_tail = tail->next;
           }
       
-      if (pop.type == TOKEN_WORD)
+      if ((pop.type == TOKEN_WORD)||(pop.type == TOKEN_MATHWORD))
         {
           char wordbuf[255];
           char macrobuf[255];
           sprintf(wordbuf, "%.*s", pop.length, pop.start);
-          macro_track_t *tmp = def_track;
-          while (tmp != def_track_tail)
+          macro_track_t *tmp = (pop.type == TOKEN_WORD) ? def_track : mathdef_track;
+          macro_track_t *tail = (pop.type == TOKEN_WORD) ? def_track_tail : mathdef_track_tail;
+          while (tmp != tail)
             {
               sprintf(macrobuf, "%.*s", tmp->macro.length, tmp->macro.start);
               if (strcmp (wordbuf, macrobuf) == 0)
@@ -147,6 +159,7 @@ compile (const char* source, const char *outpath)
               tmp = tmp->next;
             }
         }
+      
       
       /*  Write to file  */
       fprintf(fptr, "%.*s", pop.length, pop.start);

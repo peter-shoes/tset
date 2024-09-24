@@ -4,7 +4,7 @@ passed_tests=0
 for filename in $1/*.t; do
   base=$(basename $filename)
 	./bin/tset $filename /tmp/"${base}"ex
-  if diff "${filename}"ex /tmp/"${base}"ex > /dev/null; then
+  if diff "${filename}"ex /tmp/"${base}"ex; then
     echo "\e[32mTest passed\e[0m: $base"
     passed_tests=$((passed_tests+1))
   else
