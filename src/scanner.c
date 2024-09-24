@@ -152,17 +152,27 @@ comment ()
   char buf[255];
   int i = 0;
   bool first_token = true;
+  TokenType type;
   while (peek () != '\n')
     {
       if (is_whitespace (peek ()) && first_token)
         {
           buf[i] = '\0'; /* End the string  */
           if (strcmp (buf, "def") == 0)
-            return make_token (TOKEN_DEF);
+            {
+              type = TOKEN_DEF;
+              goto free;
+            }
           if (strcmp (buf, "mathdef") == 0)
-            return make_token (TOKEN_MATHDEF);
+            {
+              type = TOKEN_MATHDEF;
+              goto free;
+            }
           if (strcmp (buf, "table") == 0)
-            return make_token (TOKEN_TABLE);
+            {
+              type = TOKEN_TABLE;
+              goto free;
+            }
           first_token = false;
         }
       if (first_token)
@@ -172,15 +182,66 @@ comment ()
         }
       advance ();
     }
-  return make_token (TOKEN_COMMENT);
+  type = TOKEN_COMMENT;
+  free:
+  for (int i = 0; buf[i] != '\0'; i++)
+    buf[i] = '\0';
+  return make_token (type);
 }
 
 static Token
 command ()
 {
+  char pre[255];
+  char cmd[255];
+  bool in_pre = true;
+  int i = 0;
+  TokenType type;
   while (!is_whitespace ( peek ()) && !is_at_end ())
-    advance();
-  return make_token (TOKEN_COMMAND);
+    {
+      if ((in_pre) && (peek () != '{'))
+        {
+          pre[i] = peek ();
+          i++;
+        }
+      else if (peek () == '{')
+        {
+          in_pre = false;
+          i = 0;
+        }
+      else if ((!in_pre) && (peek () != '}'))
+        {
+          cmd[i] = peek ();
+          i++;
+        }
+      advance();
+    }
+  
+  printf("%s %s\n", pre, cmd);
+  if (strcmp (pre, "begin") == 0)
+    {
+      if (strcmp (cmd, "equation") == 0)
+        {
+          type = TOKEN_MATH_BEGIN;
+          goto free;
+        }
+    }
+  else if (strcmp (pre, "end") == 0)
+    {
+      if (strcmp (cmd, "equation") == 0)
+        {
+          type = TOKEN_MATH_END;
+          goto free;
+        }
+    }
+  else
+    type = TOKEN_COMMAND;
+  free:
+    for (int i = 0; pre[i] != '\0'; i++)
+      pre[i] = '\0';
+    for (int i = 0; cmd[i] != '\0'; i++)
+      cmd[i] = '\0'; 
+    return make_token (type);
 }
 
 static Token
@@ -195,13 +256,11 @@ static Token
 delimited_word (char end)
 {
   while (!match (end))
-    {
     if (!is_end_of_line ())
       advance ();
     else
     /*  Make sure we close the delimiter before the end of the line  */
       return make_token (TOKEN_ERROR);
-    }
   return make_token (TOKEN_WORD);
 }
 

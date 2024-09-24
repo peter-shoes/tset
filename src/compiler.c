@@ -87,6 +87,16 @@ compile (const char* source, const char *outpath)
               }
               break;
             }
+          case TOKEN_MATH_BEGIN:
+            {
+              in_mathmode = true;
+              break;
+            }
+          case TOKEN_MATH_END:
+            {
+              in_mathmode = false;
+              break;
+            }
           
           default:
             break;
