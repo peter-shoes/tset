@@ -8,7 +8,7 @@
 
 // #define DEBUG_TRACE_EXECUTION
 
-#define DEBUG_SCANNER
+// #define DEBUG_SCANNER
 // #define DEBUG_STACK
 
 #endif

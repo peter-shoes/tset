@@ -217,7 +217,6 @@ command ()
       advance();
     }
   
-  printf("%s %s\n", pre, cmd);
   if (strcmp (pre, "begin") == 0)
     {
       if (strcmp (cmd, "equation") == 0)
