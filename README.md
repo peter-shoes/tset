@@ -15,7 +15,8 @@ Just run `make`
 Install by running `sudo make install` or by copying the built binary to your /bin or /usr/bin directory.
 
 ## Testing
-Testing is handled by [DejaGNU](https://www.gnu.org/software/dejagnu/), and tests can be found in the `tests` directory.
+Testing is handled by a small bash script that diffs output, and tests can be found in the `testsuite` directory, separated by feature.
+If you want to add a new test, simply create a T file and the expected TeX file to be output, give them the same name, and place them in the appropriate folder.
 
 ## Running TSET
 Once you have built (and optionally installed) TSET, run by using the following command:
