@@ -197,6 +197,14 @@ command ()
   bool in_pre = true;
   int i = 0;
   TokenType type;
+
+  /*  Handle inline backslash-marked math mode.  */
+  if (peek () == '[')
+    return make_token (TOKEN_MATH_BEGIN);
+  if (peek () == ']')
+    return make_token (TOKEN_MATH_END);
+  
+  /*  Handle math mode with begin/end.  */
   while (!is_whitespace ( peek ()) && !is_at_end ())
     {
       if ((in_pre) && (peek () != '{'))
@@ -217,22 +225,26 @@ command ()
       advance();
     }
   
-  if (strcmp (pre, "begin") == 0)
+  if (
+    (strcmp (cmd, "equation") == 0) ||
+    (strcmp (cmd, "equation*") == 0) ||
+    (strcmp (cmd, "align") == 0) ||
+    (strcmp (cmd, "align*") == 0)
+  )
     {
-      if (strcmp (cmd, "equation") == 0)
+      if (strcmp (pre, "begin") == 0)
         {
           type = TOKEN_MATH_BEGIN;
           goto free;
         }
-    }
-  else if (strcmp (pre, "end") == 0)
-    {
-      if (strcmp (cmd, "equation") == 0)
+      else if (strcmp (pre, "end") == 0)
         {
           type = TOKEN_MATH_END;
           goto free;
         }
     }
+  
+  /*  Handle default command.  */
   else
     type = TOKEN_COMMAND;
   free:

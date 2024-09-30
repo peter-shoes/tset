@@ -38,11 +38,7 @@ check-mathsplit: tset
 
 check: tset
 	echo "\033[34mRunning all tests ...\033[0m\n"
-	echo '\n'
 	make -s check-def
-	echo '\n'
 	make -s check-mathdef
-	echo '\n'
 	make -s check-table
-	echo '\n'
 	make -s check-mathsplit
