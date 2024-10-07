@@ -142,10 +142,8 @@ skip_whitespace ()
     two tokens in the line.
     If the first token was a def or mathdef, you're saying you want to set-up
     a macro. What happens next is your fault.
-    Conversely, if there are more than three tokens in a def line, the rest 
-    will be disregarded as comments.  
     For tables, we're only concerned with the very next token, which should
-    be a path. Again, anything after that is considered a comment  */
+    be a path.  */
 static Token
 comment ()
 {
@@ -279,9 +277,6 @@ Token
 scan_token ()
 {
   scanner.start = scanner.current;
-  Token ws = skip_whitespace ();
-  if (scanner.start != scanner.current)
-    return ws;
 
   if (is_at_end ())
     return make_token (TOKEN_EOF);
@@ -293,6 +288,11 @@ scan_token ()
   char c = advance ();
   switch (c)
     {
+      case ' ':
+      case '\r':
+      case '\t':
+      case '\n':
+        return skip_whitespace ();
       case '%':
         return comment ();
       case '\\':
