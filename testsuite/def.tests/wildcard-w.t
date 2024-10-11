@@ -1,5 +1,9 @@
 \documentclass[12pt]{article}
 \begin{document}
-  %def #w@gmail.com \href{#1@gmail.com}{#1's gmail}
-  my email is foo@gmail.com
+  %def #wA {#1 has A}
+  %def B#w {#1 has B}
+  %def C#wD {#1 has C and D}
+  fooA
+  Bbar
+  CfoobarD
 \end{document}

@@ -1,12 +1,12 @@
-#include "common.h"
 #include "stack.h"
+#include "common.h"
 #include <stdio.h>
 
 typedef struct stack
-  {
-    Token *node;
-    struct stack *next;
-  } stack_t;
+{
+  Token *node;
+  struct stack *next;
+} stack_t;
 
 stack_t *program_stack;
 stack_t *stack_tail;
@@ -14,7 +14,7 @@ stack_t *stack_tail;
 int
 init_stack ()
 {
-  if ((program_stack = (stack_t*) malloc (sizeof (stack_t))) == NULL)
+  if ((program_stack = (stack_t *)malloc (sizeof (stack_t))) == NULL)
     return 1;
   stack_tail = program_stack;
   program_stack->node = NULL;
@@ -39,9 +39,9 @@ push_token (Token *token)
       program_stack->node = token;
       return 0;
     }
-  
+
   stack_t *new_node;
-  if ((new_node = (stack_t*) malloc (sizeof (stack_t))) == NULL)
+  if ((new_node = (stack_t *)malloc (sizeof (stack_t))) == NULL)
     return 1;
   new_node->node = token;
   new_node->next = NULL;
@@ -53,11 +53,11 @@ push_token (Token *token)
 /*  Note that you should call is_stack_empty() before calling this to
     avoid a segfault in the case that the stack is empty. */
 Token
-pop_token()
+pop_token ()
 {
   Token tmp;
   stack_t *hold;
-  
+
   tmp = *program_stack->node;
   hold = program_stack;
   program_stack = program_stack->next;
@@ -86,15 +86,15 @@ peek_next (int depth)
             depth--;
         }
       else
-      {
-        printf("Error: requesting invalid depth\n");
-        break;
-      }
+        {
+          printf ("Error: requesting invalid depth\n");
+          break;
+        }
     }
   return *tmp->node;
 }
 
-/*  This is a really bad thing, but I don't want to re-write this to be a 
+/*  This is a really bad thing, but I don't want to re-write this to be a
     doubly linked list, so whatever I'll take the perf hit.  */
 Token
 peek_last ()
@@ -113,5 +113,5 @@ peek_last ()
 void
 update_top_token (const char *new)
 {
-  stack_tail->node->length += (int) (new - stack_tail->node->start)-1;
+  stack_tail->node->length += (int)(new - stack_tail->node->start) - 1;
 }

@@ -8,10 +8,10 @@
 
 typedef struct
 {
-  Chunk* chunk;
-  uint8_t* ip; // instruction pointer
+  Chunk *chunk;
+  uint8_t *ip; // instruction pointer
   Value stack[STACK_MAX];
-  Value* stackTop;
+  Value *stackTop;
 } VM;
 
 typedef enum
@@ -23,7 +23,7 @@ typedef enum
 
 void initVM ();
 void freeVM ();
-InterpretResult interpret (const char* source, const char *outpath);
+InterpretResult interpret (const char *source, const char *outpath);
 void push (Value value);
 Value pop ();
 

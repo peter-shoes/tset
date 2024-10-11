@@ -2,15 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "common.h"
 #include "chunk.h"
+#include "common.h"
 #include "debug.h"
 #include "vm.h"
 
-static char*
-read_file (const char* path)
+static char *
+read_file (const char *path)
 {
-  FILE* file = fopen (path, "rb");
+  FILE *file = fopen (path, "rb");
   if (file == NULL)
     {
       fprintf (stderr, "Could not open file \"%s\".\n", path);
@@ -21,12 +21,12 @@ read_file (const char* path)
   size_t fileSize = ftell (file);
   rewind (file);
 
-  char* buffer = (char*) malloc (fileSize+1);
+  char *buffer = (char *)malloc (fileSize + 1);
   if (buffer == NULL)
-  {
-    fprintf (stderr, "Not enough memory to read\"%s\".\n", path);
-    exit (74);
-  }
+    {
+      fprintf (stderr, "Not enough memory to read\"%s\".\n", path);
+      exit (74);
+    }
 
   size_t bytesRead = fread (buffer, sizeof (char), fileSize, file);
   if (bytesRead < fileSize)
@@ -44,17 +44,17 @@ read_file (const char* path)
 static void
 run_file (const char *inpath, const char *outpath)
 {
-  char* source = read_file (inpath);
+  char *source = read_file (inpath);
   InterpretResult result = interpret (source, outpath);
   free (source);
 
   if (result == INTERPRET_COMPILE_ERROR)
-    exit(65);
+    exit (65);
   if (result == INTERPRET_RUNTIME_ERROR)
-    exit(70);
+    exit (70);
 }
 
-int 
+int
 main (int argc, char *argv[])
 {
   initVM ();
@@ -62,7 +62,7 @@ main (int argc, char *argv[])
   if (argc == 2)
     run_file (argv[1], NULL);
   else if (argc == 3)
-    run_file(argv[1], argv[2]);
+    run_file (argv[1], argv[2]);
   else
     {
       fprintf (stderr, "Usage: tset [inpath] [outpath]\n");

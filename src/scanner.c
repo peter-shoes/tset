@@ -6,15 +6,15 @@
 
 typedef struct
 {
-  const char* start;
-  const char* current;
+  const char *start;
+  const char *current;
   int line;
 } Scanner;
 
 Scanner scanner;
 
 void
-init_scanner (const char* source)
+init_scanner (const char *source)
 {
   scanner.start = source;
   scanner.current = source;
@@ -24,7 +24,7 @@ init_scanner (const char* source)
 static bool
 is_alpha (char c)
 {
-  return  (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
+  return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
 }
 
 static bool
@@ -34,7 +34,7 @@ is_digit (char c)
 }
 
 static bool
-is_at_end () 
+is_at_end ()
 {
   return *scanner.current == '\0';
 }
@@ -48,12 +48,7 @@ is_end_of_line ()
 static bool
 is_whitespace (char c)
 {
-  if (
-    (c == ' ') ||
-    (c == '\r') ||
-    (c == '\t') ||
-    (c == '\n')
-  )
+  if ((c == ' ') || (c == '\r') || (c == '\t') || (c == '\n'))
     return true;
   return false;
 }
@@ -65,16 +60,17 @@ advance ()
   return scanner.current[-1];
 }
 
-static char 
+static char
 peek ()
 {
   return *scanner.current;
 }
 
 static char
-peek_next () 
+peek_next ()
 {
-  if (is_at_end ()) return '\0';
+  if (is_at_end ())
+    return '\0';
   return scanner.current[1];
 }
 
@@ -95,24 +91,24 @@ make_token (TokenType type)
   Token token;
   token.type = type;
   token.start = scanner.start;
-  token.length = (int) (scanner.current - scanner.start);
+  token.length = (int)(scanner.current - scanner.start);
   token.line = scanner.line;
   return token;
 }
 
 static Token
-error_token (const char* message)
+error_token (const char *message)
 {
   Token token;
   token.type = TOKEN_ERROR;
   token.start = message;
-  token.length = (int) strlen (message);
+  token.length = (int)strlen (message);
   token.line = scanner.line;
   return token;
 }
 
 static Token
-skip_whitespace () 
+skip_whitespace ()
 {
   const char *start = scanner.current;
   for (;;)
@@ -120,24 +116,24 @@ skip_whitespace ()
       char c = peek ();
       switch (c)
         {
-          case ' ':
-          case '\r':
-          case '\t':
-            advance ();
-            break;
-          case '\n':
-            scanner.line++;
-            advance ();
-            break;
-          default:
-            return make_token (TOKEN_WHITESPACE);
+        case ' ':
+        case '\r':
+        case '\t':
+          advance ();
+          break;
+        case '\n':
+          scanner.line++;
+          advance ();
+          break;
+        default:
+          return make_token (TOKEN_WHITESPACE);
         }
-    }  
+    }
 }
 
-/*  LaTeX comments go to the next \n char after the % char, 
+/*  LaTeX comments go to the next \n char after the % char,
     scan the whole line, return as a single token
-    
+
     NOTE: in order to figure out what the def is modifying, just take the next
     two tokens in the line.
     If the first token was a def or mathdef, you're saying you want to set-up
@@ -181,7 +177,7 @@ comment ()
       advance ();
     }
   type = TOKEN_COMMENT;
-  free:
+free:
   for (int i = 0; buf[i] != '\0'; i++)
     buf[i] = '\0';
   return make_token (type);
@@ -201,9 +197,9 @@ command ()
     return make_token (TOKEN_MATH_BEGIN);
   if (peek () == ']')
     return make_token (TOKEN_MATH_END);
-  
+
   /*  Handle math mode with begin/end.  */
-  while (!is_whitespace ( peek ()) && !is_at_end ())
+  while (!is_whitespace (peek ()) && !is_at_end ())
     {
       if ((in_pre) && (peek () != '{'))
         {
@@ -220,15 +216,11 @@ command ()
           cmd[i] = peek ();
           i++;
         }
-      advance();
+      advance ();
     }
-  
-  if (
-    (strcmp (cmd, "equation") == 0) ||
-    (strcmp (cmd, "equation*") == 0) ||
-    (strcmp (cmd, "align") == 0) ||
-    (strcmp (cmd, "align*") == 0)
-  )
+
+  if ((strcmp (cmd, "equation") == 0) || (strcmp (cmd, "equation*") == 0)
+      || (strcmp (cmd, "align") == 0) || (strcmp (cmd, "align*") == 0))
     {
       if (strcmp (pre, "begin") == 0)
         {
@@ -241,23 +233,23 @@ command ()
           goto free;
         }
     }
-  
+
   /*  Handle default command.  */
   else
     type = TOKEN_COMMAND;
-  free:
-    for (int i = 0; pre[i] != '\0'; i++)
-      pre[i] = '\0';
-    for (int i = 0; cmd[i] != '\0'; i++)
-      cmd[i] = '\0'; 
-    return make_token (type);
+free:
+  for (int i = 0; pre[i] != '\0'; i++)
+    pre[i] = '\0';
+  for (int i = 0; cmd[i] != '\0'; i++)
+    cmd[i] = '\0';
+  return make_token (type);
 }
 
 static Token
 word ()
 {
-  while (!is_whitespace ( peek ()) && !is_at_end () && (peek () != '$'))
-    advance();
+  while (!is_whitespace (peek ()) && !is_at_end () && (peek () != '$'))
+    advance ();
   return make_token (TOKEN_WORD);
 }
 
@@ -268,7 +260,7 @@ delimited_word (char end)
     if (!is_end_of_line ())
       advance ();
     else
-    /*  Make sure we close the delimiter before the end of the line  */
+      /*  Make sure we close the delimiter before the end of the line  */
       return make_token (TOKEN_ERROR);
   return make_token (TOKEN_WORD);
 }
@@ -280,38 +272,40 @@ scan_token ()
 
   if (is_at_end ())
     return make_token (TOKEN_EOF);
-  
-  /*  What we want to do is use spaces as a delimiter and figure out what 
+
+  /*  What we want to do is use spaces as a delimiter and figure out what
       each token looks like based on that.
       There are no numbers or letters or symbols, it's all semantic  */
 
   char c = advance ();
   switch (c)
     {
-      case ' ':
-      case '\r':
-      case '\t':
-      case '\n':
-        return skip_whitespace ();
-      case '%':
-        return comment ();
-      case '\\':
-        return command ();
-      case '{':
-        return delimited_word ('}');
-      case '(':
-        return delimited_word (')');
-      case '[':
-        return delimited_word (']');
-      case '"':
-        return delimited_word('"');
-      case '\'':
-        return delimited_word ('\'');
-      case '$':
-        return make_token (TOKEN_MATHDOLLAR_BEGIN);
-      default:
-        return word ();
+    case ' ':
+    case '\r':
+    case '\t':
+      return skip_whitespace ();
+    case '\n':
+      scanner.line++;
+      return skip_whitespace ();
+    case '%':
+      return comment ();
+    case '\\':
+      return command ();
+    case '{':
+      return delimited_word ('}');
+    case '(':
+      return delimited_word (')');
+    case '[':
+      return delimited_word (']');
+    case '"':
+      return delimited_word ('"');
+    case '\'':
+      return delimited_word ('\'');
+    case '$':
+      return make_token (TOKEN_MATHDOLLAR_BEGIN);
+    default:
+      return word ();
     }
   /*  It should never execute this code  */
-  return error_token("Unexpected character.");
+  return error_token ("Unexpected character.");
 }
