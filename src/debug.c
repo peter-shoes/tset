@@ -1,5 +1,6 @@
 #include "debug.h"
 #include "value.h"
+#include "common.h"
 #include <stdio.h>
 
 void
@@ -63,8 +64,8 @@ disassemble_instruction (Chunk *chunk, int offset)
 void
 debug_token (Token token, int *line)
 {
-  if (token.type == TOKEN_WHITESPACE)
-    return;
+  // if (token.type == TOKEN_WHITESPACE)
+    // return;
   if (token.line != *line)
     {
       printf ("%4d ", token.line);
@@ -72,5 +73,8 @@ debug_token (Token token, int *line)
     }
   else
     printf ("   | ");
-  printf ("%2d '%.*s'\n", token.type, token.length, token.start);
+  if (token.type != TOKEN_WHITESPACE)
+    printf ("%2d '%.*s'\n", token.type, token.length, token.start);
+  else
+    printf ("%2d <WS>\n", token.type);
 }

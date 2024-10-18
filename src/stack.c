@@ -2,14 +2,9 @@
 #include "common.h"
 #include <stdio.h>
 
-typedef struct stack
-{
-  Token *node;
-  struct stack *next;
-} stack_t;
-
 stack_t *program_stack;
 stack_t *stack_tail;
+Token *last_non_whitespace;
 
 int
 init_stack ()
@@ -46,7 +41,9 @@ push_token (Token *token)
   new_node->node = token;
   new_node->next = NULL;
   stack_tail->next = new_node;
-  stack_tail = new_node;
+  stack_tail = stack_tail->next;
+  if (token->type != TOKEN_WHITESPACE)
+    last_non_whitespace = new_node->node;
   return 0;
 }
 
@@ -94,24 +91,47 @@ peek_next (int depth)
   return *tmp->node;
 }
 
-/*  This is a really bad thing, but I don't want to re-write this to be a
-    doubly linked list, so whatever I'll take the perf hit.  */
-Token
+Token*
 peek_last ()
 {
-  stack_t *tmp = program_stack;
-  Token hold;
-  while (tmp->next != NULL)
-    {
-      if (tmp->node->type != TOKEN_WHITESPACE)
-        hold = *tmp->node;
-      tmp = tmp->next;
-    }
-  return hold;
+  if (last_non_whitespace != NULL)
+    return last_non_whitespace;
+  return NULL;
 }
 
 void
 update_top_token (const char *new)
 {
   stack_tail->node->length += (int)(new - stack_tail->node->start) - 1;
+}
+
+int
+unwind_macro (macro_store_t *head)
+{
+  macro_store_t *macro_tmp = head;
+  stack_t *stack_tmp = program_stack;
+  bool match = true;
+  while (!is_stack_empty() && (macro_tmp->node.type != TOKEN_MACROBODY))
+    {
+      /*  TODO: error checking  */
+      /*  TODO: make sure "next" isn't EOF  */
+      while (stack_tmp->node->type == TOKEN_WHITESPACE)
+        stack_tmp = stack_tmp->next;
+      char *stack_tok = malloc (stack_tmp->node->length * sizeof(char));
+      char *macro_tok = malloc (macro_tmp->node.length * sizeof(char));
+      sprintf(stack_tok, "%.*s", stack_tmp->node->length, stack_tmp->node->start);
+      sprintf(macro_tok, "%.*s", macro_tmp->node.length, macro_tmp->node.start);
+
+
+      // printf("\n[%s, %s]\n", stack_tok, macro_tok);
+      if (strcmp (stack_tok, macro_tok) != 0)
+        return 1;
+
+      free(stack_tok);
+      free(macro_tok);
+
+      stack_tmp = stack_tmp->next;
+      macro_tmp = macro_tmp->next;
+    }
+  return 0;
 }

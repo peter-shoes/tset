@@ -3,10 +3,15 @@
 #ifndef COMPILER_H
 #define COMPILER_H
 
+typedef struct macro_store
+{
+  Token node;
+  struct macro_store *next;
+} macro_store_t;
+
 typedef struct macro_track
 {
-  Token macro;
-  Token body;
+  macro_store_t *store;
   struct macro_track *next;
 } macro_track_t;
 

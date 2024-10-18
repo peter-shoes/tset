@@ -248,7 +248,7 @@ free:
 static Token
 word ()
 {
-  while (!is_whitespace (peek ()) && !is_at_end () && (peek () != '$'))
+  while (is_alpha (peek ()) || is_digit (peek ()))
     advance ();
   return make_token (TOKEN_WORD);
 }
@@ -263,6 +263,30 @@ delimited_word (char end)
       /*  Make sure we close the delimiter before the end of the line  */
       return make_token (TOKEN_ERROR);
   return make_token (TOKEN_WORD);
+}
+
+static Token
+wildcard ()
+{
+  char pn = peek ();
+  if (pn == 'w')
+    {
+      advance ();
+      return make_token (TOKEN_WILDCARDWORD);
+    }
+  else if (pn == 's')
+    {
+      advance ();
+      return make_token (TOKEN_WILDCARDSTRING);
+    }
+  else if (is_digit (pn))
+    {
+      while (is_digit (peek ()))
+        advance ();
+      return make_token (TOKEN_WILDCARDBODY);
+    }
+  return word ();
+  
 }
 
 Token
@@ -291,16 +315,24 @@ scan_token ()
       return comment ();
     case '\\':
       return command ();
+    case '#':
+      return wildcard ();      
     case '{':
-      return delimited_word ('}');
+      return make_token (TOKEN_OPENCURL);
+    case '}':
+      return make_token (TOKEN_CLOSECURL);
     case '(':
-      return delimited_word (')');
+      return make_token (TOKEN_OPENPAREN);
+    case ')':
+      return make_token (TOKEN_CLOSEPAREN);
     case '[':
-      return delimited_word (']');
+      return make_token (TOKEN_OPENSQUARE);
+    case ']':
+      return make_token (TOKEN_CLOSESQUARE);
     case '"':
-      return delimited_word ('"');
+      return make_token (TOKEN_DOUBLEQUOTE);
     case '\'':
-      return delimited_word ('\'');
+      return make_token (TOKEN_SINGLEQUOTE);
     case '$':
       return make_token (TOKEN_MATHDOLLAR_BEGIN);
     default:

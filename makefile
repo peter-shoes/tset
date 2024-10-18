@@ -7,7 +7,7 @@ MATHDEFTEST = $(TEST)/mathdef.tests
 TABLETEST = $(TEST)/table.tests
 MATHSPLITTEST = $(TEST)/mathsplit.tests
 
-
+# Don't forget to remove debug info in prod !!!!
 tset: $(SRC) $(INC) $(BIN)
 	gcc -g $(SRC)/* -I $(INC) -o $(BIN)/tset
 
