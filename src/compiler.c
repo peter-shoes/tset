@@ -223,15 +223,9 @@ compile (const char *source, const char *outpath)
         {
           macro_track_t *track_tail;
           if (pop.type == TOKEN_DEF)
-            {
-              track_tail = def_track_tail;
-              printf("adding def\n");
-            }
+            track_tail = def_track_tail;
           else
-            {
-              track_tail = mathdef_track_tail;
-              printf("adding mathdef\n");
-            }
+            track_tail = mathdef_track_tail;
 
           stack_fini(pop, fptr);
           macro_store_t *new_store, *tmp;
@@ -244,7 +238,7 @@ compile (const char *source, const char *outpath)
           while (!eom)
             {
               pop = pop_token ();
-              /* TODO: this can cause roblems if the line is malformed.  */
+              /* TODO: this can cause problems if the line is malformed.  */
               if (pop.type != TOKEN_WHITESPACE)
                 {
                   tmp->node = pop;
@@ -270,17 +264,14 @@ compile (const char *source, const char *outpath)
       else if (pop.type != TOKEN_WHITESPACE)
         {
           macro_track_t *tmp_track;
-          if (pop.type == TOKEN_MATHWORD || TOKEN_MATHDOLLAR_BEGIN
-              || TOKEN_MATH_BEGIN)
+          if (pop.type == TOKEN_MATHWORD || pop.type == TOKEN_MATHDOLLAR_BEGIN
+              || pop.type == TOKEN_MATH_BEGIN)
             tmp_track = mathdef_track;
           else
             tmp_track = def_track;
           
           if (tmp_track->next == NULL)
-            {
-              // printf("null track %d\n", pop.type);
-              goto fini;
-            }
+            goto fini;
           
           bool match_found = false;
           while (!match_found && tmp_track->next != NULL)
