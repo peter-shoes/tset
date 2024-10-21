@@ -64,8 +64,8 @@ disassemble_instruction (Chunk *chunk, int offset)
 void
 debug_token (Token token, int *line)
 {
-  // if (token.type == TOKEN_WHITESPACE)
-    // return;
+  if (token.type == TOKEN_WHITESPACE)
+    return;
   if (token.line != *line)
     {
       printf ("%4d ", token.line);
@@ -75,6 +75,6 @@ debug_token (Token token, int *line)
     printf ("   | ");
   if (token.type != TOKEN_WHITESPACE)
     printf ("%2d '%.*s'\n", token.type, token.length, token.start);
-  else
-    printf ("%2d <WS>\n", token.type);
+  // else
+  //   printf ("%2d <WS>\n", token.type);
 }

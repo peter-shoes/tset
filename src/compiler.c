@@ -131,6 +131,8 @@ compile (const char *source, const char *outpath)
         case TOKEN_COMMAND:
         case TOKEN_WORD:
           {
+            if (in_mathmode || in_mathdollar)
+              token.type = TOKEN_MATHWORD;
             break;
           }
 
@@ -212,14 +214,24 @@ compile (const char *source, const char *outpath)
 
   while (!is_stack_empty ())
     {
+      stack_top:
       Token pop = pop_token ();
 
 
       /*  Handle macros  */
       if ((pop.type == TOKEN_DEF) || (pop.type == TOKEN_MATHDEF))
         {
-          macro_track_t *track_tail = (pop.type == TOKEN_DEF) ? def_track_tail
-                                                        : mathdef_track_tail;
+          macro_track_t *track_tail;
+          if (pop.type == TOKEN_DEF)
+            {
+              track_tail = def_track_tail;
+              printf("adding def\n");
+            }
+          else
+            {
+              track_tail = mathdef_track_tail;
+              printf("adding mathdef\n");
+            }
 
           stack_fini(pop, fptr);
           macro_store_t *new_store, *tmp;
@@ -240,27 +252,35 @@ compile (const char *source, const char *outpath)
                   if ((tmp->next = malloc (sizeof (macro_store_t))) == NULL)
                     goto oom;
                   tmp = tmp->next;
-                  
-                  stack_fini(pop, fptr);
                 }
               else if (pop.line != defline)
-                eom = true;
-              else
-                stack_fini(pop, fptr);
+                goto end_macro;
+              
+              stack_fini(pop, fptr);
             }
+          end_macro:
           track_tail->store = new_store;
           if ((track_tail->next = malloc (sizeof (macro_track_t))) == NULL)
             goto oom;
           track_tail = track_tail->next;
+          goto stack_top;
         }
       
       /*  Match macros  */
       else if (pop.type != TOKEN_WHITESPACE)
         {
-          macro_track_t *tmp_track
-              = (pop.type == TOKEN_MATHWORD) ? mathdef_track : def_track;
+          macro_track_t *tmp_track;
+          if (pop.type == TOKEN_MATHWORD || TOKEN_MATHDOLLAR_BEGIN
+              || TOKEN_MATH_BEGIN)
+            tmp_track = mathdef_track;
+          else
+            tmp_track = def_track;
+          
           if (tmp_track->next == NULL)
-            goto fini;
+            {
+              // printf("null track %d\n", pop.type);
+              goto fini;
+            }
           
           bool match_found = false;
           while (!match_found && tmp_track->next != NULL)

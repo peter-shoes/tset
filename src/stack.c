@@ -79,8 +79,8 @@ peek_next (int depth)
       if (tmp->next != NULL)
         {
           tmp = tmp->next;
-          if (tmp->node->type != TOKEN_WHITESPACE)
-            depth--;
+          // if (tmp->node->type != TOKEN_WHITESPACE)
+          depth--;
         }
       else
         {

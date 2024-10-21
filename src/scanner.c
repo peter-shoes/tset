@@ -190,7 +190,7 @@ command ()
   char cmd[255];
   bool in_pre = true;
   int i = 0;
-  TokenType type;
+  TokenType type = TOKEN_COMMAND;
 
   /*  Handle inline backslash-marked math mode.  */
   if (peek () == '[')
@@ -209,6 +209,7 @@ command ()
       else if (peek () == '{')
         {
           in_pre = false;
+          pre[i] = '\0';
           i = 0;
         }
       else if ((!in_pre) && (peek () != '}'))
@@ -218,7 +219,7 @@ command ()
         }
       advance ();
     }
-
+  cmd[i] = '\0';
   if ((strcmp (cmd, "equation") == 0) || (strcmp (cmd, "equation*") == 0)
       || (strcmp (cmd, "align") == 0) || (strcmp (cmd, "align*") == 0))
     {
@@ -234,13 +235,10 @@ command ()
         }
     }
 
-  /*  Handle default command.  */
-  else
-    type = TOKEN_COMMAND;
 free:
-  for (int i = 0; pre[i] != '\0'; i++)
+  for (i = 0; pre[i] != '\0'; i++)
     pre[i] = '\0';
-  for (int i = 0; cmd[i] != '\0'; i++)
+  for (i = 0; cmd[i] != '\0'; i++)
     cmd[i] = '\0';
   return make_token (type);
 }
