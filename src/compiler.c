@@ -203,12 +203,11 @@ compile (const char *source, const char *outpath)
     }
   
   /*  Set up trackers for macros  */
-  macro_track_t *def_track = (macro_track_t *)malloc (sizeof (macro_track_t));
+  macro_track_t *def_track = malloc (sizeof (macro_track_t));
   macro_track_t *def_track_tail = def_track;
   def_track->next = NULL;
 
-  macro_track_t *mathdef_track
-      = (macro_track_t *)malloc (sizeof (macro_track_t));
+  macro_track_t *mathdef_track = malloc (sizeof (macro_track_t));
   macro_track_t *mathdef_track_tail = mathdef_track;
   mathdef_track->next = NULL;
 
@@ -291,18 +290,20 @@ compile (const char *source, const char *outpath)
           if (match_found)
             {
               /*  Initialize a data structure to hold wildcards.  */
-              Token wildcard_buf[16];
+              Token wildcard_buf[32];
               int i = 0;
               while ((tmp_store->node.type != TOKEN_MACROBODY) && (tmp_store->node.type != TOKEN_WILDCARDBODY))
                 {
                   /*  Iterate through both the stack and the macro at the same time.  */
-                  if (tmp_store->node.type == TOKEN_WILDCARDWORD)
-                    {
-                      wildcard_buf[i] = pop;
-                      i++;
-                    }
                   if (pop.type != TOKEN_WHITESPACE)
-                    tmp_store = tmp_store->next;
+                    {
+                      if (tmp_store->node.type == TOKEN_WILDCARDWORD)
+                        {
+                          wildcard_buf[i] = pop;
+                          i++;
+                        }
+                      tmp_store = tmp_store->next;
+                    }
                   pop = pop_token();
                 }
 
@@ -311,7 +312,8 @@ compile (const char *source, const char *outpath)
                 {
                   /*  Fetch the relevant wildcard, if appropriate.  */
                   if (tmp_store->node.type == TOKEN_WILDCARDBODY)
-                    stack_fini(wildcard_buf[atoi(tmp_store->node.start++)], fptr);
+                    stack_fini(wildcard_buf[atoi(tmp_store->node.start + sizeof(char)) -1], fptr);
+                    // printf("id: %d\n", atoi(tmp_store->node.start + sizeof(char)));
                   else
                     stack_fini(tmp_store->node, fptr);
                   tmp_store = tmp_store->next;

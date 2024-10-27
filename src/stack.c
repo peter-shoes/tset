@@ -134,8 +134,10 @@ unwind_macro (Token pop, macro_store_t *head)
       macro_tok = malloc (macro_tmp->node.length * sizeof(char));
       sprintf(macro_tok, "%.*s", macro_tmp->node.length, macro_tmp->node.start);
 
-
-      // printf("\nstack: %s \t macro: %s\n", stack_tok, macro_tok);
+      #ifdef DEBUG_REPLACE
+      printf("\nstack: %s \t macro: %s\n", stack_tok, macro_tok);
+      #endif
+      
       if (strcmp (macro_tok, "#w") == 0);
       else if (strcmp (stack_tok, macro_tok) != 0)
         return 1;
