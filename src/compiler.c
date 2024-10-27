@@ -233,22 +233,27 @@ compile (const char *source, const char *outpath)
             goto oom;
           tmp = new_store;
           
+          /*  Note that while we want to disregard spaces in the macro,
+              they are important to track in the macrobody.  */
           int defline = pop.line;
           bool eom = false;
+          bool in_macrobody = false;
           while (!eom)
             {
               pop = pop_token ();
               /* TODO: this can cause problems if the line is malformed.  */
-              if (pop.type != TOKEN_WHITESPACE)
+              if (pop.line != defline)
+                goto end_macro;
+              if ((pop.type != TOKEN_WHITESPACE) || in_macrobody)
                 {
+                  if ((pop.type == TOKEN_MACROBODY) || (pop.type == TOKEN_WILDCARDBODY))
+                    in_macrobody = true;
                   tmp->node = pop;
 
                   if ((tmp->next = malloc (sizeof (macro_store_t))) == NULL)
                     goto oom;
                   tmp = tmp->next;
                 }
-              else if (pop.line != defline)
-                goto end_macro;
               
               stack_fini(pop, fptr);
             }
@@ -281,20 +286,17 @@ compile (const char *source, const char *outpath)
                 tmp_track = tmp_track->next;
             }
           
+          /*  Execute the matching sequence.  */
           macro_store_t *tmp_store = tmp_track->store;
           if (match_found)
             {
-              // /*  Because the match was found at the NEXT stack loc.  */
-              // stack_fini (pop, fptr);
-              // while ((pop = pop_token ()).type == TOKEN_WHITESPACE)
-              //   stack_fini (pop, fptr);
-
               /*  Initialize a data structure to hold wildcards.  */
               Token wildcard_buf[16];
               int i = 0;
               while ((tmp_store->node.type != TOKEN_MACROBODY) && (tmp_store->node.type != TOKEN_WILDCARDBODY))
                 {
-                  if (pop.type == TOKEN_WILDCARDWORD)
+                  /*  Iterate through both the stack and the macro at the same time.  */
+                  if (tmp_store->node.type == TOKEN_WILDCARDWORD)
                     {
                       wildcard_buf[i] = pop;
                       i++;
@@ -303,11 +305,13 @@ compile (const char *source, const char *outpath)
                     tmp_store = tmp_store->next;
                   pop = pop_token();
                 }
+
+              /*  Execute the replacement sequence.  */
               while (tmp_store->next != NULL)
                 {
-                  /*  Fetch the appropriate wildcard.  */
+                  /*  Fetch the relevant wildcard, if appropriate.  */
                   if (tmp_store->node.type == TOKEN_WILDCARDBODY)
-                      stack_fini(wildcard_buf[atoi(tmp_store->node.start++)], fptr);
+                    stack_fini(wildcard_buf[atoi(tmp_store->node.start++)], fptr);
                   else
                     stack_fini(tmp_store->node, fptr);
                   tmp_store = tmp_store->next;
