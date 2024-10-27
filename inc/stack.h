@@ -18,5 +18,5 @@ int is_stack_empty();
 Token peek_next (int);
 Token* peek_last ();
 void update_top_token (const char *);
-int unwind_macro (macro_store_t *);
+int unwind_macro (Token, macro_store_t *);
 #endif

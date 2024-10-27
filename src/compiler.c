@@ -276,7 +276,7 @@ compile (const char *source, const char *outpath)
           bool match_found = false;
           while (!match_found && tmp_track->next != NULL)
             {
-              match_found = !unwind_macro(tmp_track->store);
+              match_found = !unwind_macro(pop, tmp_track->store);
               if (!match_found)
                 tmp_track = tmp_track->next;
             }
@@ -284,20 +284,32 @@ compile (const char *source, const char *outpath)
           macro_store_t *tmp_store = tmp_track->store;
           if (match_found)
             {
-              /*  Because the match was found at the NEXT stack loc.  */
-              stack_fini (pop, fptr);
-              while ((pop = pop_token ()).type == TOKEN_WHITESPACE)
-                stack_fini (pop, fptr);
+              // /*  Because the match was found at the NEXT stack loc.  */
+              // stack_fini (pop, fptr);
+              // while ((pop = pop_token ()).type == TOKEN_WHITESPACE)
+              //   stack_fini (pop, fptr);
 
-              while (tmp_store->node.type != TOKEN_MACROBODY)
+              /*  Initialize a data structure to hold wildcards.  */
+              Token wildcard_buf[16];
+              int i = 0;
+              while ((tmp_store->node.type != TOKEN_MACROBODY) && (tmp_store->node.type != TOKEN_WILDCARDBODY))
                 {
+                  if (pop.type == TOKEN_WILDCARDWORD)
+                    {
+                      wildcard_buf[i] = pop;
+                      i++;
+                    }
                   if (pop.type != TOKEN_WHITESPACE)
                     tmp_store = tmp_store->next;
                   pop = pop_token();
                 }
               while (tmp_store->next != NULL)
                 {
-                  stack_fini(tmp_store->node, fptr);
+                  /*  Fetch the appropriate wildcard.  */
+                  if (tmp_store->node.type == TOKEN_WILDCARDBODY)
+                      stack_fini(wildcard_buf[atoi(tmp_store->node.start++)], fptr);
+                  else
+                    stack_fini(tmp_store->node, fptr);
                   tmp_store = tmp_store->next;
                 }
                 

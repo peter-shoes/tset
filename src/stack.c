@@ -106,31 +106,47 @@ update_top_token (const char *new)
 }
 
 int
-unwind_macro (macro_store_t *head)
+unwind_macro (Token pop, macro_store_t *head)
 {
   macro_store_t *macro_tmp = head;
   stack_t *stack_tmp = program_stack;
-  bool match = true;
-  while (!is_stack_empty() && (macro_tmp->node.type != TOKEN_MACROBODY))
+
+  char *stack_tok, *macro_tok;
+  bool first = true;
+  while (!is_stack_empty ()
+         && (macro_tmp->node.type != TOKEN_MACROBODY)
+         && (macro_tmp->node.type != TOKEN_WILDCARDBODY))
     {
       /*  TODO: error checking  */
       /*  TODO: make sure "next" isn't EOF  */
       while (stack_tmp->node->type == TOKEN_WHITESPACE)
         stack_tmp = stack_tmp->next;
-      char *stack_tok = malloc (stack_tmp->node->length * sizeof(char));
-      char *macro_tok = malloc (macro_tmp->node.length * sizeof(char));
-      sprintf(stack_tok, "%.*s", stack_tmp->node->length, stack_tmp->node->start);
+      if (first)
+        {
+          stack_tok = malloc (pop.length * sizeof(char));
+          sprintf(stack_tok, "%.*s", pop.length, pop.start);
+        }
+      else
+        {
+          stack_tok = malloc (stack_tmp->node->length * sizeof(char));
+          sprintf(stack_tok, "%.*s", stack_tmp->node->length, stack_tmp->node->start);
+        }
+      macro_tok = malloc (macro_tmp->node.length * sizeof(char));
       sprintf(macro_tok, "%.*s", macro_tmp->node.length, macro_tmp->node.start);
 
 
-      // printf("\n[%s, %s]\n", stack_tok, macro_tok);
-      if (strcmp (stack_tok, macro_tok) != 0)
+      // printf("\nstack: %s \t macro: %s\n", stack_tok, macro_tok);
+      if (strcmp (macro_tok, "#w") == 0);
+      else if (strcmp (stack_tok, macro_tok) != 0)
         return 1;
 
       free(stack_tok);
       free(macro_tok);
-
-      stack_tmp = stack_tmp->next;
+      
+      if (!first)
+        stack_tmp = stack_tmp->next;
+      else
+        first = false;
       macro_tmp = macro_tmp->next;
     }
   return 0;
