@@ -277,6 +277,11 @@ wildcard ()
       advance ();
       return make_token (TOKEN_WILDCARDSTRING);
     }
+  else if (pn == 'i')
+    {
+      advance ();
+      return make_token (TOKEN_WILDCARDNUMBER);
+    }
   else if (is_digit (pn))
     {
       while (is_digit (peek ()))
@@ -284,6 +289,22 @@ wildcard ()
       return make_token (TOKEN_WILDCARDBODY);
     }
   return word ();
+  
+}
+
+/*  Scan for both integers and floating point numbers.  */
+static Token
+number ()
+{
+  while (is_digit (peek ()))
+    advance ();
+  if (match ('.'))
+    advance ();
+  else
+    return make_token (TOKEN_WORDNUMBER);
+  while (is_digit (peek ()))
+    advance ();
+  return make_token (TOKEN_WORDNUMBER);
   
 }
 
@@ -334,7 +355,14 @@ scan_token ()
     case '$':
       return make_token (TOKEN_MATHDOLLAR_BEGIN);
     default:
-      return word ();
+      {
+        if (is_digit (c))
+          return number ();
+        else if (is_alpha (c))
+          return word ();
+        else
+          return make_token (TOKEN_ETCSYMBOL);
+      }
     }
   /*  It should never execute this code  */
   return error_token ("Unexpected character.");

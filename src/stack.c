@@ -113,6 +113,7 @@ unwind_macro (Token pop, macro_store_t *head)
 
   char *stack_tok, *macro_tok;
   bool first = true;
+  TokenType stack_type = TOKEN_ETCSYMBOL;
   while (!is_stack_empty ()
          && (macro_tmp->node.type != TOKEN_MACROBODY)
          && (macro_tmp->node.type != TOKEN_WILDCARDBODY))
@@ -121,24 +122,32 @@ unwind_macro (Token pop, macro_store_t *head)
       /*  TODO: make sure "next" isn't EOF  */
       while (stack_tmp->node->type == TOKEN_WHITESPACE)
         stack_tmp = stack_tmp->next;
+      
       if (first)
         {
           stack_tok = malloc (pop.length * sizeof(char));
           sprintf(stack_tok, "%.*s", pop.length, pop.start);
+          stack_type = pop.type;
         }
       else
         {
           stack_tok = malloc (stack_tmp->node->length * sizeof(char));
           sprintf(stack_tok, "%.*s", stack_tmp->node->length, stack_tmp->node->start);
+          stack_type = stack_tmp->node->type;
         }
       macro_tok = malloc (macro_tmp->node.length * sizeof(char));
       sprintf(macro_tok, "%.*s", macro_tmp->node.length, macro_tmp->node.start);
 
       #ifdef DEBUG_REPLACE
-      printf("\nstack: %s \t macro: %s\n", stack_tok, macro_tok);
+      printf("\n[ %s , %s ]\n", stack_tok, macro_tok);
       #endif
-      
-      if (strcmp (macro_tok, "#w") == 0);
+
+      if (macro_tmp->node.type == TOKEN_WILDCARDWORD);
+      else if ((macro_tmp->node.type == TOKEN_WILDCARDNUMBER)
+               && ((stack_type == TOKEN_WORDNUMBER)
+                   || (stack_type == TOKEN_MATHNUMBER)))
+        ;
+
       else if (strcmp (stack_tok, macro_tok) != 0)
         return 1;
 

@@ -117,6 +117,7 @@ compile (const char *source, const char *outpath)
 
               if (token.type == TOKEN_WILDCARDWORD
                        || token.type == TOKEN_WILDCARDSTRING
+                       || token.type == TOKEN_WILDCARDNUMBER
                        || token.type == TOKEN_WILDCARDBODY
                        || token.type == TOKEN_WHITESPACE);
               else if (nspaces == 1)
@@ -127,12 +128,18 @@ compile (const char *source, const char *outpath)
               compiler_fini (token);
             }
 
-        make_word:
         case TOKEN_COMMAND:
         case TOKEN_WORD:
+        case TOKEN_ETCSYMBOL:
           {
             if (in_mathmode || in_mathdollar)
               token.type = TOKEN_MATHWORD;
+            break;
+          }
+        case TOKEN_WORDNUMBER:
+          {
+            if (in_mathmode || in_mathdollar)
+              token.type = TOKEN_MATHNUMBER;
             break;
           }
 
@@ -269,7 +276,7 @@ compile (const char *source, const char *outpath)
         {
           macro_track_t *tmp_track;
           if (pop.type == TOKEN_MATHWORD || pop.type == TOKEN_MATHDOLLAR_BEGIN
-              || pop.type == TOKEN_MATH_BEGIN)
+              || pop.type == TOKEN_MATH_BEGIN || pop.type == TOKEN_MATHNUMBER)
             tmp_track = mathdef_track;
           else
             tmp_track = def_track;
@@ -297,7 +304,10 @@ compile (const char *source, const char *outpath)
                   /*  Iterate through both the stack and the macro at the same time.  */
                   if (pop.type != TOKEN_WHITESPACE)
                     {
-                      if (tmp_store->node.type == TOKEN_WILDCARDWORD)
+                      if (tmp_store->node.type == TOKEN_WILDCARDWORD
+                          || ((tmp_store->node.type == TOKEN_WILDCARDNUMBER)
+                              && ((pop.type == TOKEN_WORDNUMBER)
+                                  || (pop.type == TOKEN_MATHNUMBER))))
                         {
                           wildcard_buf[i] = pop;
                           i++;
