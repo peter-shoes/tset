@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "chunk.h"
+
 #include "common.h"
 #include "debug.h"
 #include "vm.h"
@@ -57,8 +57,6 @@ run_file (const char *inpath, const char *outpath)
 int
 main (int argc, char *argv[])
 {
-  initVM ();
-
   if (argc == 2)
     run_file (argv[1], NULL);
   else if (argc == 3)
@@ -69,6 +67,5 @@ main (int argc, char *argv[])
       exit (64);
     }
 
-  freeVM ();
   return 0;
 }
