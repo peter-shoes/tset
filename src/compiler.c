@@ -215,7 +215,7 @@ compile (const char *source, const char *outpath)
   def_track->next = NULL;
 
   macro_track_t *mathdef_track = malloc (sizeof (macro_track_t));
-  macro_track_t *mathdef_track_tail = mathdef_track;
+  macro_track_t *mathdef_track_tail = def_track;
   mathdef_track->next = NULL;
 
   while (!is_stack_empty ())
@@ -227,11 +227,7 @@ compile (const char *source, const char *outpath)
       /*  Handle macros  */
       if ((pop.type == TOKEN_DEF) || (pop.type == TOKEN_MATHDEF))
         {
-          macro_track_t *track_tail;
-          if (pop.type == TOKEN_DEF)
-            track_tail = def_track_tail;
-          else
-            track_tail = mathdef_track_tail;
+          TokenType deftype = pop.type;
 
           stack_fini(pop, fptr);
           macro_store_t *new_store, *tmp;
@@ -264,10 +260,20 @@ compile (const char *source, const char *outpath)
               stack_fini(pop, fptr);
             }
           end_macro:
-          track_tail->store = new_store;
-          if ((track_tail->next = malloc (sizeof (macro_track_t))) == NULL)
-            goto oom;
-          track_tail = track_tail->next;
+          if (deftype == TOKEN_DEF)
+            {
+              def_track_tail->store = new_store;
+              if ((def_track_tail->next = malloc (sizeof (macro_track_t))) == NULL)
+                goto oom;
+              def_track_tail = def_track_tail->next;
+            }
+          else
+            {
+              mathdef_track_tail->store = new_store;
+              if ((mathdef_track_tail->next = malloc (sizeof (macro_track_t))) == NULL)
+                goto oom;
+              mathdef_track_tail = mathdef_track_tail->next; 
+            }
           goto stack_top;
         }
       
