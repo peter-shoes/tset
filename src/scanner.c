@@ -167,6 +167,16 @@ comment ()
               type = TOKEN_TABLE;
               goto free;
             }
+          if (strcmp (buf, "mathword") == 0)
+            {
+              type = TOKEN_MATHWORD_CMD;
+              goto free;
+            }
+          if (strcmp (buf, "mathwordlist") == 0)
+            {
+              type = TOKEN_MATHWORDLIST_CMD;
+              goto free;
+            }
           first_token = false;
         }
       if (first_token)

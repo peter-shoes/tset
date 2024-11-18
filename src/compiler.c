@@ -277,6 +277,46 @@ compile (const char *source, const char *outpath)
           goto stack_top;
         }
       
+      if (pop.type == TOKEN_MATHWORD_CMD)
+        {
+          stack_fini(pop, fptr);
+          macro_store_t *new_store, *tmp;
+          if ((new_store = malloc (sizeof (macro_store_t))) == NULL)
+            goto oom;
+          tmp = new_store;
+
+          pop = pop_token ();
+          while (pop.type == TOKEN_WHITESPACE)
+            {
+              stack_fini (pop, fptr);
+              pop = pop_token ();
+            }
+
+          pop.type = TOKEN_MACRO;
+          tmp->node = pop;
+          stack_fini (pop, fptr);
+
+          if ((tmp->next = malloc (sizeof (macro_store_t))) == NULL)
+            goto oom;
+          tmp = tmp->next;
+
+          Token *rm_tok = malloc (sizeof (Token));
+          char *rm_tok_str = malloc (sizeof (char) * (6 + pop.length));
+          sprintf (rm_tok_str, "{\\rm %.*s}", pop.length, pop.start);
+          rm_tok->start = rm_tok_str;
+          rm_tok->length = 6 + pop.length;
+          rm_tok->type = TOKEN_MACROBODY;
+          rm_tok->line = pop.line;
+          tmp->node = *rm_tok;
+          tmp = tmp->next;
+
+          mathdef_track_tail->store = new_store;
+          if ((mathdef_track_tail->next = malloc (sizeof (macro_track_t))) == NULL)
+            goto oom;
+          mathdef_track_tail = mathdef_track_tail->next;
+          goto stack_top;
+        }
+      
       /*  Match macros  */
       else if (pop.type != TOKEN_WHITESPACE)
         {
