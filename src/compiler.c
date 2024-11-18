@@ -215,7 +215,7 @@ compile (const char *source, const char *outpath)
   def_track->next = NULL;
 
   macro_track_t *mathdef_track = malloc (sizeof (macro_track_t));
-  macro_track_t *mathdef_track_tail = def_track;
+  macro_track_t *mathdef_track_tail = mathdef_track;
   mathdef_track->next = NULL;
 
   while (!is_stack_empty ())
