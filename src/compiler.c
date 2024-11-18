@@ -300,14 +300,16 @@ compile (const char *source, const char *outpath)
             goto oom;
           tmp = tmp->next;
 
-          Token *rm_tok = malloc (sizeof (Token));
+          Token rm_tok;
           char *rm_tok_str = malloc (sizeof (char) * (6 + pop.length));
           sprintf (rm_tok_str, "{\\rm %.*s}", pop.length, pop.start);
-          rm_tok->start = rm_tok_str;
-          rm_tok->length = 6 + pop.length;
-          rm_tok->type = TOKEN_MACROBODY;
-          rm_tok->line = pop.line;
-          tmp->node = *rm_tok;
+          rm_tok.start = rm_tok_str;
+          rm_tok.length = 6 + pop.length;
+          rm_tok.type = TOKEN_MACROBODY;
+          rm_tok.line = pop.line;
+          tmp->node = rm_tok;
+          if ((tmp->next = malloc (sizeof (macro_store_t))) == NULL)
+            goto oom;
           tmp = tmp->next;
 
           mathdef_track_tail->store = new_store;
