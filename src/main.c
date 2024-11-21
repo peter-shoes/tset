@@ -7,7 +7,7 @@
 #include "debug.h"
 #include "vm.h"
 
-static char *
+char *
 read_file (const char *path)
 {
   FILE *file = fopen (path, "rb");

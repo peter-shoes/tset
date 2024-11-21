@@ -6,6 +6,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+
+char* read_file (const char *path);
 
 // #define DEBUG_TRACE_EXECUTION
 

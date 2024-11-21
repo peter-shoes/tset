@@ -2,5 +2,5 @@
 \begin{document}
   %def ( T ) LaTeX
   This is a ( T ) file.
-  %table table-file.csv
+  %table testsuite/table.tests/table-file.csv
 \end{document}

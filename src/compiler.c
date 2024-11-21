@@ -5,6 +5,7 @@
 #include "compiler.h"
 #include "debug.h"
 #include "stack.h"
+#include "table.h"
 
 #define PAREN 0x2
 #define SQUARE 0x4
@@ -142,7 +143,22 @@ compile (const char *source, const char *outpath)
               token.type = TOKEN_MATHNUMBER;
             break;
           }
-
+        case TOKEN_TABLE:
+          compiler_fini (token);
+          int tabline = token.line;
+          token = scan_token();
+          while (token.type == TOKEN_WHITESPACE)
+            {
+              compiler_fini (token);
+              token = scan_token();
+            }
+          while (token.line == tabline && token.type != TOKEN_WHITESPACE)
+            {
+              token.type = TOKEN_TABLE_PATH;
+              compiler_fini (token);
+              token = scan_token ();
+            }
+          break;
         case TOKEN_ERROR:
           {
             fprintf (stderr,
@@ -316,6 +332,15 @@ compile (const char *source, const char *outpath)
           if ((mathdef_track_tail->next = malloc (sizeof (macro_track_t))) == NULL)
             goto oom;
           mathdef_track_tail = mathdef_track_tail->next;
+          goto stack_top;
+        }
+      
+      if (pop.type == TOKEN_TABLE)
+        {
+          char *table_string = produce_table ();
+          pop.start = table_string;
+          pop.length = strlen (table_string);
+          stack_fini (pop, fptr);
           goto stack_top;
         }
       

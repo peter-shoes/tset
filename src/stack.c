@@ -74,7 +74,7 @@ Token
 peek_next (int depth)
 {
   stack_t *tmp = program_stack;
-  while (depth >= 0)
+  while (depth > 0)
     {
       if (tmp->next != NULL)
         {
