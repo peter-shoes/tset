@@ -49,7 +49,7 @@ produce_table ()
   dim = get_table_dim (table_buf);
 
   char *table_preamble = "\\begin{table}[]\\begin{tabular}{|";
-  char *table_postamble = " \\hline\\end{tabular} ";
+  char *table_postamble = "\\\\\\hline \\end{tabular}\\end{table}";
   // TODO: fix this
   latex_buf = calloc (strlen (table_buf) + strlen (table_preamble) + strlen (table_postamble) + 1000, sizeof (char));
 
@@ -74,8 +74,8 @@ produce_table ()
         }
       else if (*tmp == '\n')
         {
-          strcat (latex_buf, " \\\\ \\hline ");
-          buf_ptr += strlen (" \\\\ \\hline ");
+          strcat (latex_buf, " \\\\\\hline ");
+          buf_ptr += strlen (" \\\\\\hline ");
         }
       else
         {
