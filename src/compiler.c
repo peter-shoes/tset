@@ -122,7 +122,7 @@ compile (const char *source, const char *outpath)
                        || token.type == TOKEN_WILDCARDBODY
                        || token.type == TOKEN_WHITESPACE);
               else if (nspaces == 1)
-                token.type = TOKEN_MACRO;
+                token.type = TOKEN_MACROHEAD;
               else if (nspaces == 2)
                 token.type = TOKEN_MACROBODY;
 
@@ -308,7 +308,7 @@ compile (const char *source, const char *outpath)
               pop = pop_token ();
             }
 
-          pop.type = TOKEN_MACRO;
+          pop.type = TOKEN_MACROHEAD;
           tmp->node = pop;
           stack_fini (pop, fptr);
 
@@ -384,6 +384,25 @@ compile (const char *source, const char *outpath)
                         {
                           wildcard_buf[i] = pop;
                           i++;
+                        }
+                      /*  Keep stepping through the stack until we find the
+                          token following the string in the macro header.  */
+                      else if (tmp_store->node.type == TOKEN_WILDCARDSTRING)
+                        {
+                          char *string_exit = malloc (tmp_store->next->node.length * sizeof (char));
+                          sprintf(string_exit, "%.*s", tmp_store->next->node.length, tmp_store->next->node.start);
+                          char *pop_str;                          
+                          
+                          wildcard_buf[i] = pop;
+                          
+                          while (strcmp (pop_str, string_exit) != 0)
+                            {
+                              pop = peek_next (1);
+                              pop_token ();
+                              pop_str = malloc (pop.length * sizeof (char));
+                              sprintf(pop_str, "%.*s", pop.length, pop.start);                              
+                              wildcard_buf[i].length += pop.length;
+                            }
                         }
                       tmp_store = tmp_store->next;
                     }

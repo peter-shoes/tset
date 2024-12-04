@@ -111,15 +111,23 @@ unwind_macro (Token pop, macro_store_t *head)
   macro_store_t *macro_tmp = head;
   stack_t *stack_tmp = program_stack;
 
-  char *stack_tok, *macro_tok;
+  char *stack_tok, *macro_tok, *string_exit_tok;
   bool first = true;
   TokenType stack_type = TOKEN_ETCSYMBOL;
+  bool in_string = false;
+  Token string_exit;
   while (!is_stack_empty ()
          && (macro_tmp->node.type != TOKEN_MACROBODY)
          && (macro_tmp->node.type != TOKEN_WILDCARDBODY))
     {
+      /*  make sure "next" isn't EOF  */
+      // if (stack_tmp->node->type == TOKEN_EOF)
+      //   {
+      //     fprintf (stderr, "ERROR: Reached EOF before finding end of match\n");
+      //     fprintf (stderr, "Maybe you forgot to terminate #s?\n");
+      //     return 1;
+      //   }
       /*  TODO: error checking  */
-      /*  TODO: make sure "next" isn't EOF  */
       while (stack_tmp->node->type == TOKEN_WHITESPACE)
         stack_tmp = stack_tmp->next;
       
@@ -131,11 +139,11 @@ unwind_macro (Token pop, macro_store_t *head)
         }
       else
         {
-          stack_tok = malloc (stack_tmp->node->length * sizeof(char));
+          stack_tok = malloc (stack_tmp->node->length * sizeof (char));
           sprintf(stack_tok, "%.*s", stack_tmp->node->length, stack_tmp->node->start);
           stack_type = stack_tmp->node->type;
         }
-      macro_tok = malloc (macro_tmp->node.length * sizeof(char));
+      macro_tok = malloc (macro_tmp->node.length * sizeof (char));
       sprintf(macro_tok, "%.*s", macro_tmp->node.length, macro_tmp->node.start);
 
       #ifdef DEBUG_REPLACE
@@ -143,6 +151,24 @@ unwind_macro (Token pop, macro_store_t *head)
       #endif
 
       if (macro_tmp->node.type == TOKEN_WILDCARDWORD);
+      else if (macro_tmp->node.type == TOKEN_WILDCARDSTRING && !in_string)
+        {
+          in_string = true;
+          
+          /*  Handle unbounded #s macro def.  */
+          if (macro_tmp->next == NULL)
+            {
+              fprintf (stderr, "ERROR: no right bound on #s wildcard.\n");
+              return 1;
+            }
+          else
+            {
+              string_exit = macro_tmp->next->node;
+              string_exit_tok = malloc ( string_exit.length * sizeof (char));
+              sprintf (string_exit_tok, "%.*s", string_exit.length, string_exit.start);
+            }
+        }
+      else if (macro_tmp->node.type == TOKEN_WILDCARDSTRING);
       else if ((macro_tmp->node.type == TOKEN_WILDCARDNUMBER)
                && ((stack_type == TOKEN_WORDNUMBER)
                    || (stack_type == TOKEN_MATHNUMBER)))
@@ -151,6 +177,13 @@ unwind_macro (Token pop, macro_store_t *head)
       else if (strcmp (stack_tok, macro_tok) != 0)
         return 1;
 
+      if (string_exit_tok != NULL && in_string)
+        if (strcmp (stack_tok, string_exit_tok) == 0)
+          {
+            macro_tmp = macro_tmp->next;
+            in_string = false;
+          }
+
       free(stack_tok);
       free(macro_tok);
       
@@ -158,7 +191,9 @@ unwind_macro (Token pop, macro_store_t *head)
         stack_tmp = stack_tmp->next;
       else
         first = false;
-      macro_tmp = macro_tmp->next;
+      
+      if (!in_string)
+        macro_tmp = macro_tmp->next;
     }
   return 0;
 }
