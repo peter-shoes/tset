@@ -399,10 +399,12 @@ compile (const char *source, const char *outpath)
                             {
                               pop = peek_next (1);
                               pop_token ();
+                              // pop = pop_token ();
                               pop_str = malloc (pop.length * sizeof (char));
                               sprintf(pop_str, "%.*s", pop.length, pop.start);                              
                               wildcard_buf[i].length += pop.length;
                             }
+                          i++;
                         }
                       tmp_store = tmp_store->next;
                     }
