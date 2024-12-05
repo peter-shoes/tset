@@ -63,7 +63,7 @@ compile (const char *source, const char *outpath)
 
       switch (token.type)
         {
-        
+
         /*  Set the bracket */
         case TOKEN_OPENPAREN:
           cur_bracket |= PAREN;
@@ -88,7 +88,7 @@ compile (const char *source, const char *outpath)
           if (cur_bracket & CURL)
             token.type = TOKEN_ERROR;
           break;
-        
+
         case TOKEN_DEF:
         case TOKEN_MATHDEF:
           int defline = token.line;
@@ -117,10 +117,11 @@ compile (const char *source, const char *outpath)
                 loc_cur_bracket ^= CURL;
 
               if (token.type == TOKEN_WILDCARDWORD
-                       || token.type == TOKEN_WILDCARDSTRING
-                       || token.type == TOKEN_WILDCARDNUMBER
-                       || token.type == TOKEN_WILDCARDBODY
-                       || token.type == TOKEN_WHITESPACE);
+                  || token.type == TOKEN_WILDCARDSTRING
+                  || token.type == TOKEN_WILDCARDNUMBER
+                  || token.type == TOKEN_WILDCARDBODY
+                  || token.type == TOKEN_WHITESPACE)
+                ;
               else if (nspaces == 1)
                 token.type = TOKEN_MACROHEAD;
               else if (nspaces == 2)
@@ -146,11 +147,11 @@ compile (const char *source, const char *outpath)
         case TOKEN_TABLE:
           compiler_fini (token);
           int tabline = token.line;
-          token = scan_token();
+          token = scan_token ();
           while (token.type == TOKEN_WHITESPACE)
             {
               compiler_fini (token);
-              token = scan_token();
+              token = scan_token ();
             }
           while (token.line == tabline && token.type != TOKEN_WHITESPACE)
             {
@@ -224,7 +225,7 @@ compile (const char *source, const char *outpath)
           exit (1);
         }
     }
-  
+
   /*  Set up trackers for macros  */
   macro_track_t *def_track = malloc (sizeof (macro_track_t));
   macro_track_t *def_track_tail = def_track;
@@ -236,21 +237,20 @@ compile (const char *source, const char *outpath)
 
   while (!is_stack_empty ())
     {
-      stack_top:
+    stack_top:
       Token pop = pop_token ();
-
 
       /*  Handle macros  */
       if ((pop.type == TOKEN_DEF) || (pop.type == TOKEN_MATHDEF))
         {
           TokenType deftype = pop.type;
 
-          stack_fini(pop, fptr);
+          stack_fini (pop, fptr);
           macro_store_t *new_store, *tmp;
           if ((new_store = malloc (sizeof (macro_store_t))) == NULL)
             goto oom;
           tmp = new_store;
-          
+
           /*  Note that while we want to disregard spaces in the macro,
               they are important to track in the macrobody.  */
           int defline = pop.line;
@@ -264,7 +264,8 @@ compile (const char *source, const char *outpath)
                 goto end_macro;
               if ((pop.type != TOKEN_WHITESPACE) || in_macrobody)
                 {
-                  if ((pop.type == TOKEN_MACROBODY) || (pop.type == TOKEN_WILDCARDBODY))
+                  if ((pop.type == TOKEN_MACROBODY)
+                      || (pop.type == TOKEN_WILDCARDBODY))
                     in_macrobody = true;
                   tmp->node = pop;
 
@@ -272,30 +273,32 @@ compile (const char *source, const char *outpath)
                     goto oom;
                   tmp = tmp->next;
                 }
-              
-              stack_fini(pop, fptr);
+
+              stack_fini (pop, fptr);
             }
-          end_macro:
+        end_macro:
           if (deftype == TOKEN_DEF)
             {
               def_track_tail->store = new_store;
-              if ((def_track_tail->next = malloc (sizeof (macro_track_t))) == NULL)
+              if ((def_track_tail->next = malloc (sizeof (macro_track_t)))
+                  == NULL)
                 goto oom;
               def_track_tail = def_track_tail->next;
             }
           else
             {
               mathdef_track_tail->store = new_store;
-              if ((mathdef_track_tail->next = malloc (sizeof (macro_track_t))) == NULL)
+              if ((mathdef_track_tail->next = malloc (sizeof (macro_track_t)))
+                  == NULL)
                 goto oom;
-              mathdef_track_tail = mathdef_track_tail->next; 
+              mathdef_track_tail = mathdef_track_tail->next;
             }
           goto stack_top;
         }
-      
+
       if (pop.type == TOKEN_MATHWORD_CMD)
         {
-          stack_fini(pop, fptr);
+          stack_fini (pop, fptr);
           macro_store_t *new_store, *tmp;
           if ((new_store = malloc (sizeof (macro_store_t))) == NULL)
             goto oom;
@@ -329,12 +332,13 @@ compile (const char *source, const char *outpath)
           tmp = tmp->next;
 
           mathdef_track_tail->store = new_store;
-          if ((mathdef_track_tail->next = malloc (sizeof (macro_track_t))) == NULL)
+          if ((mathdef_track_tail->next = malloc (sizeof (macro_track_t)))
+              == NULL)
             goto oom;
           mathdef_track_tail = mathdef_track_tail->next;
           goto stack_top;
         }
-      
+
       if (pop.type == TOKEN_TABLE)
         {
           char *table_string = produce_table ();
@@ -343,7 +347,7 @@ compile (const char *source, const char *outpath)
           stack_fini (pop, fptr);
           goto stack_top;
         }
-      
+
       /*  Match macros  */
       else if (pop.type != TOKEN_WHITESPACE)
         {
@@ -353,18 +357,18 @@ compile (const char *source, const char *outpath)
             tmp_track = mathdef_track;
           else
             tmp_track = def_track;
-          
+
           if (tmp_track->next == NULL)
             goto fini;
-          
+
           bool match_found = false;
           while (!match_found && tmp_track->next != NULL)
             {
-              match_found = !unwind_macro(pop, tmp_track->store);
+              match_found = !unwind_macro (pop, tmp_track->store);
               if (!match_found)
                 tmp_track = tmp_track->next;
             }
-          
+
           /*  Execute the matching sequence.  */
           macro_store_t *tmp_store = tmp_track->store;
           if (match_found)
@@ -372,9 +376,11 @@ compile (const char *source, const char *outpath)
               /*  Initialize a data structure to hold wildcards.  */
               Token wildcard_buf[32];
               int i = 0;
-              while ((tmp_store->node.type != TOKEN_MACROBODY) && (tmp_store->node.type != TOKEN_WILDCARDBODY))
+              while ((tmp_store->node.type != TOKEN_MACROBODY)
+                     && (tmp_store->node.type != TOKEN_WILDCARDBODY))
                 {
-                  /*  Iterate through both the stack and the macro at the same time.  */
+                  /*  Iterate through both the stack and the macro at the same
+                   * time.  */
                   if (pop.type != TOKEN_WHITESPACE)
                     {
                       if (tmp_store->node.type == TOKEN_WILDCARDWORD
@@ -389,26 +395,31 @@ compile (const char *source, const char *outpath)
                           token following the string in the macro header.  */
                       else if (tmp_store->node.type == TOKEN_WILDCARDSTRING)
                         {
-                          char *string_exit = malloc (tmp_store->next->node.length * sizeof (char));
-                          sprintf(string_exit, "%.*s", tmp_store->next->node.length, tmp_store->next->node.start);
-                          char *pop_str;                          
-                          
+                          char *string_exit = malloc (
+                              tmp_store->next->node.length * sizeof (char));
+                          sprintf (string_exit, "%.*s",
+                                   tmp_store->next->node.length,
+                                   tmp_store->next->node.start);
+
+                          char *pop_str = malloc (pop.length * sizeof (char));
+                          sprintf (pop_str, "%.*s", pop.length, pop.start);
                           wildcard_buf[i] = pop;
-                          
+
                           while (strcmp (pop_str, string_exit) != 0)
                             {
-                              pop = peek_next (1);
-                              pop_token ();
-                              // pop = pop_token ();
+                              free (pop_str);
+                              pop = pop_token ();
                               pop_str = malloc (pop.length * sizeof (char));
-                              sprintf(pop_str, "%.*s", pop.length, pop.start);                              
-                              wildcard_buf[i].length += pop.length;
+                              sprintf (pop_str, "%.*s", pop.length, pop.start);
+                              if (strcmp (pop_str, string_exit) != 0)
+                                wildcard_buf[i].length += pop.length;
                             }
                           i++;
+                          tmp_store = tmp_store->next;
                         }
                       tmp_store = tmp_store->next;
                     }
-                  pop = pop_token();
+                  pop = pop_token ();
                 }
 
               /*  Execute the replacement sequence.  */
@@ -416,25 +427,28 @@ compile (const char *source, const char *outpath)
                 {
                   /*  Fetch the relevant wildcard, if appropriate.  */
                   if (tmp_store->node.type == TOKEN_WILDCARDBODY)
-                    stack_fini(wildcard_buf[atoi(tmp_store->node.start + sizeof(char)) -1], fptr);
-                    // printf("id: %d\n", atoi(tmp_store->node.start + sizeof(char)));
+                    stack_fini (wildcard_buf[atoi (tmp_store->node.start
+                                                   + sizeof (char))
+                                             - 1],
+                                fptr);
+                  // printf("id: %d\n", atoi(tmp_store->node.start +
+                  // sizeof(char)));
                   else
-                    stack_fini(tmp_store->node, fptr);
+                    stack_fini (tmp_store->node, fptr);
                   tmp_store = tmp_store->next;
                 }
-                
             }
         }
-      fini:
-      stack_fini(pop, fptr);
+    fini:
+      stack_fini (pop, fptr);
     }
-  
+
   if (fptr == stdout)
     fprintf (fptr, "\n");
   // free_stack ();
   return;
-  
-  oom:
-    fprintf(stderr, "out of memory");
-    exit(1);
+
+oom:
+  fprintf (stderr, "out of memory");
+  exit (1);
 }
