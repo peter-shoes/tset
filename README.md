@@ -35,7 +35,7 @@ MacOS is very similar to Linux, so the above steps for linux should work just fi
 
 ## Windows
 Getting TSET running natively on a Windows system is possible, but I personally do not know anything about the Windows compiler toolchain provided by Microsoft. You can probably use LLVM if you like, but the included makefile only contains gcc recipes.
-As an alternative approach, I recomend that you install either pure [MinGW](https://www.mingw-w64.org/) or the derivative project [Cygwin](https://cygwin.com/). Once you have one of these installed, you'll then need to run the provided terminal and be sure that you have the appropriate toolchains present. You have the option of installing a package manager like [apt-cyg](https://github.com/transcode-open/apt-cyg) for Cygwin, and then running
+As an alternative approach, I recommend that you install either pure [MinGW](https://www.mingw-w64.org/) or the derivative project [Cygwin](https://cygwin.com/). Once you have one of these installed, you'll then need to run the provided terminal and be sure that you have the appropriate toolchains present. You have the option of installing a package manager like [apt-cyg](https://github.com/transcode-open/apt-cyg) for Cygwin, and then running
 ```
 sudo apt-cyg install git
 ```
@@ -43,7 +43,7 @@ At this point, you can simply follow the above linux instructions.
 
 ### Installing on Windows the low-tech way
 
-However, if this is above your experience level, I would reccomend simply pulling the current version of this repository using wget, unzipping it, and then building using the above linux instructions.
+However, if this is above your experience level, I would recommend simply pulling the current version of this repository using wget, unzipping it, and then building using the above linux instructions.
 To do this, simply run the following:
 ```
 wget https://github.com/peter-shoes/tset/archive/refs/heads/main.zip && unzip main.zip && mv tset-main tset
@@ -85,11 +85,11 @@ and would become:
 ```
 This is a fraction: $\frac{3}{4}$
 ```
-Note that becase we are using the `#n` wildcard rather than the `#w` wildcard, only numbers would be recognized. Therefore a string like:
+Note that because we are using the `#n` wildcard rather than the `#w` wildcard, only numbers would be recognized. Therefore a string like:
 ```
 you can have chicken/fish.
 ```
-would not cintain a match
+would not contain a match
 ## Tables
 Tables are very straightforward, simply use the format:
 ```
@@ -99,5 +99,5 @@ Tables are very straightforward, simply use the format:
 TSET contains a number of what could be considered "passive additions" to the TeX language. These are things that the user does not need to ask for and are implemented automatically. For example, all lines in math mode that are grouped using brackets are given hinting wrap commands that will break the line in an appropriate place if the TeX compiler decided a linebreak is needed. Additionally, sub and superscripts are automatically bundled, so a typed `2^100` becomes `2^{100}`.
 # Maintenance and Contribution
 This project is currently being built to a version 1.0, and as such contributions are not accepted at this time. This work is anticipated to be completed by 12/24, at which time we will open the issues page for contributions and bug reports.
-This project will be maintained after 12/24. It should not need much maintenance, as it does not depend on any external libraries. In the case that LaTeX itself undergoes some sort of format change that effects TSET, I will do my best to update the work.
+This project will be maintained after 12/24. It should not need much maintenance, as it does not depend on any external libraries. In the case that LaTeX itself undergoes some sort of format change that affects TSET, I will do my best to update the work.
 If anyone is interested in maintaining a package for their favorite distribution, please get in contact with me here. I will likely be maintaining at least an RPM for this work.
